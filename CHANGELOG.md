@@ -5,6 +5,21 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.2]
+
+> Note: `0.3.1` was published to npm from a commit that bypassed code review and
+> was subsequently reverted from `main`; `0.3.2` reintroduces the same fix through
+> the normal review process. There is no `0.3.1` git tag/GitHub release.
+
+### Fixed
+
+- HTTP mode: `express-rate-limit` logged an `ERR_ERL_UNEXPECTED_X_FORWARDED_FOR`
+  validation error on every request when deployed behind a reverse proxy, because
+  Express's `trust proxy` setting was left at its default (`false`) while the proxy
+  set `X-Forwarded-For`. Added a `TRUST_PROXY` env var (default `0`, i.e. trust
+  none) to set Express's `trust proxy` explicitly, so rate limiting keys correctly
+  off the real client IP when deployed behind a known number of proxy hops.
+
 ## [0.3.0]
 
 ### Added

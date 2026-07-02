@@ -89,6 +89,8 @@ export interface HttpConfig {
   allowedHosts: string[] | undefined;
   allowedOrigins: string[] | undefined;
   enableDnsRebindingProtection: boolean;
+  /** Number of reverse-proxy hops to trust for X-Forwarded-* headers (Express `trust proxy`). 0 = none (default). */
+  trustProxy: number;
   // Shared knobs, reused per user context.
   fallbackAccessToken: string | undefined;
   defaultBudgetId: string | undefined;
@@ -137,6 +139,7 @@ export function loadHttpConfig(): HttpConfig {
     enableDnsRebindingProtection:
       parseBoolean(process.env['ENABLE_DNS_REBINDING_PROTECTION'], false, 'ENABLE_DNS_REBINDING_PROTECTION') &&
       (allowedHosts !== undefined || allowedOrigins !== undefined),
+    trustProxy: parseInteger(process.env['TRUST_PROXY'], 0, 'TRUST_PROXY'),
     fallbackAccessToken: process.env['YNAB_ACCESS_TOKEN'] || undefined,
     defaultBudgetId: process.env['YNAB_BUDGET_ID'] || undefined,
     readOnly: parseBoolean(process.env['YNAB_READ_ONLY'], true, 'YNAB_READ_ONLY'),
