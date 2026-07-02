@@ -39,6 +39,7 @@ function makeConfig(overrides: Partial<HttpConfig> = {}): HttpConfig {
     allowedHosts: undefined,
     allowedOrigins: undefined,
     enableDnsRebindingProtection: false,
+    trustProxy: 0,
     fallbackAccessToken: undefined,
     defaultBudgetId: undefined,
     readOnly: false,
