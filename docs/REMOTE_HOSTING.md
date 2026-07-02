@@ -46,7 +46,6 @@ Set these environment variables (see `.env.example`):
 | `DATABASE_URL` | if postgres | `postgres://user:pass@host:5432/db` |
 | `ALLOWED_HOSTS` / `ALLOWED_ORIGINS` | recommended | Allowlists for DNS-rebinding/Origin checks |
 | `ENABLE_DNS_REBINDING_PROTECTION` | recommended | `true` (needs an allowlist above) |
-| `TRUST_PROXY` | if behind a reverse proxy | Hop count to trust for `X-Forwarded-*` (e.g. `1` behind a single Traefik/Caddy/nginx) — needed for accurate per-client rate limiting |
 
 OAuth mode activates automatically once `YNAB_OAUTH_CLIENT_ID`,
 `YNAB_OAUTH_CLIENT_SECRET`, `ENCRYPTION_KEY`, and `PUBLIC_URL` are all set. Use a

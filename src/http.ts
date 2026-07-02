@@ -57,11 +57,6 @@ type ContextResult =
  */
 export async function createHttpApp(config: HttpConfig): Promise<express.Express> {
   const app = express();
-  // Number of reverse-proxy hops to trust for X-Forwarded-* (rate limiting, audit
-  // logging). Defaults to 0 (trust none) so a self-hosted, direct-exposed instance
-  // can't have its rate limit bypassed by a spoofed header; set TRUST_PROXY to the
-  // hop count when running behind a known ingress (e.g. 1 behind a single Traefik).
-  app.set('trust proxy', config.trustProxy);
   app.use(express.json({ limit: '4mb' }));
 
   const transports = new Map<string, StreamableHTTPServerTransport>();

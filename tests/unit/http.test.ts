@@ -15,7 +15,6 @@ function makeConfig(overrides: Partial<HttpConfig> = {}): HttpConfig {
     allowedHosts: undefined,
     allowedOrigins: undefined,
     enableDnsRebindingProtection: false,
-    trustProxy: 0,
     fallbackAccessToken: undefined,
     defaultBudgetId: undefined,
     readOnly: true,
@@ -53,16 +52,6 @@ describe('HTTP transport', () => {
     expect(res.status).toBe(200);
     expect(res.body.status).toBe('ok');
     expect(res.body.transport).toBe('http');
-  });
-
-  it('defaults to not trusting any reverse proxy hop', async () => {
-    const app = await createHttpApp(makeConfig());
-    expect(app.get('trust proxy')).toBe(0);
-  });
-
-  it('trusts the configured number of reverse-proxy hops', async () => {
-    const app = await createHttpApp(makeConfig({ trustProxy: 1 }));
-    expect(app.get('trust proxy')).toBe(1);
   });
 
   it('POST /mcp with a non-initialize request and no session → 400', async () => {
