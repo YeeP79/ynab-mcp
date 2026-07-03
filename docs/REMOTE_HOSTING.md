@@ -99,6 +99,22 @@ volumes: { ynab-data: {} }
   npx mcp-remote https://YOUR_PUBLIC_URL/mcp
   ```
 
+## Prompts
+
+The server also exposes 7 MCP Prompts — guided, YNAB-methodology-grounded
+workflows that orchestrate several tools into a single review. Available in
+any MCP client that supports the `prompts` capability:
+
+| Prompt | What it does |
+|---|---|
+| `ynab-pulse-check` | Fast daily-style status: Ready to Assign, health score, overspending, spending pace |
+| `ynab-monthly-review` | Full end-of-month review: budget vs. actuals, goals, net worth, next month's suggested budget |
+| `ynab-assign-money` | Give Every Dollar a Job — allocates unassigned Ready to Assign money |
+| `ynab-true-expenses` | Embrace Your True Expenses — plans for irregular/annual costs and missing recurring bills |
+| `ynab-overspending-triage` | Roll With the Punches — finds overspending and suggests moves to fix it |
+| `ynab-age-of-money` | Age Your Money — checks cash cushion, credit card float, near-term cash flow |
+| `ynab-reconcile-cleanup` | Weekly hygiene: uncleared transactions and unused/sprawling categories |
+
 ## Security notes
 
 - YNAB refresh tokens are encrypted at rest with AES-256-GCM (`ENCRYPTION_KEY`).

@@ -310,6 +310,39 @@ Coverage of the YNAB API endpoints:
 - `ynab_health_check` — Test API connectivity
 </details>
 
+## Available Prompts
+
+Beyond raw tool access, the server exposes 7 MCP Prompts — guided workflows
+grounded in YNAB's own budgeting methodology (the Four Rules, Age of Money,
+True Expenses) that orchestrate several tools into a single review. Any MCP
+client that supports the `prompts` capability can invoke them directly.
+
+| Prompt | What it does |
+|--------|---------------|
+| `ynab-pulse-check` | Fast daily-style status check |
+| `ynab-monthly-review` | Full end-of-month budget review and next month's suggested targets |
+| `ynab-assign-money` | Give Every Dollar a Job — allocate unassigned funds |
+| `ynab-true-expenses` | Embrace Your True Expenses — plan for irregular/annual costs |
+| `ynab-overspending-triage` | Roll With the Punches — find and fix overspending |
+| `ynab-age-of-money` | Age Your Money — check cash cushion and credit card float |
+| `ynab-reconcile-cleanup` | Weekly hygiene: reconciliation and category cleanup |
+
+See [docs/REMOTE_HOSTING.md](docs/REMOTE_HOSTING.md#prompts) for details.
+
+## Skills
+
+Our MCP server gives Claude access to your YNAB budget. Our skills teach
+Claude YNAB's own best practices — some work standalone, some get sharper
+when connected. Together, they turn raw budget data into an actual coach.
+
+The [`skills/`](skills/README.md) directory has 15 [Claude Agent Skills](https://www.anthropic.com/news/skills):
+7 that orchestrate this MCP server's tools into guided reviews, and 8
+standalone coaching skills (getting started, debt payoff, irregular income,
+windfalls, emergency funds, and more) that work with or without this server
+connected. Every [GitHub Release](https://github.com/auzroz/ynab-mcp/releases)
+attaches them as downloadable zips — see [skills/README.md](skills/README.md)
+for the full list and install instructions.
+
 ## Development
 
 ```bash

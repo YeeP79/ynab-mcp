@@ -7,6 +7,10 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListPromptsRequestSchema,
+  GetPromptRequestSchema,
+  McpError,
+  ErrorCode,
 } from '@modelcontextprotocol/sdk/types.js';
 import type { Config } from './config/environment.js';
 
@@ -20,6 +24,7 @@ import { RateLimiter } from './services/rate-limiter.js';
 import { Cache } from './services/cache.js';
 import { AuditLog } from './services/audit-log.js';
 import { tools, handleToolCall } from './tools/index.js';
+import { prompts, getPromptMessages, sanitizePromptName } from './prompts/index.js';
 import { formatErrorResponse } from './utils/errors.js';
 
 /**
@@ -65,6 +70,7 @@ export function createServerFromClient(ynabClient: YnabClient): Server {
     {
       capabilities: {
         tools: {},
+        prompts: {},
       },
     }
   );
@@ -86,6 +92,20 @@ export function createServerFromClient(ynabClient: YnabClient): Server {
         content: [{ type: 'text', text: formatErrorResponse(error) }],
         isError: true,
       };
+    }
+  });
+
+  server.setRequestHandler(ListPromptsRequestSchema, async () => {
+    return { prompts };
+  });
+
+  server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+    const { name, arguments: args } = request.params;
+
+    try {
+      return getPromptMessages(name, args ?? {});
+    } catch {
+      throw new McpError(ErrorCode.InvalidParams, `Unknown prompt: ${sanitizePromptName(name)}`);
     }
   });
 
