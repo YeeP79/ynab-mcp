@@ -5,6 +5,29 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.3]
+
+### Added
+
+- **MCP Prompts.** The server now exposes 7 guided-workflow prompts
+  (`ynab-pulse-check`, `ynab-monthly-review`, `ynab-assign-money`,
+  `ynab-true-expenses`, `ynab-overspending-triage`, `ynab-age-of-money`,
+  `ynab-reconcile-cleanup`), grounded in YNAB's own budgeting methodology (the
+  Four Rules, Age of Money, True Expenses). Available to any MCP client that
+  supports the `prompts` capability, automatically, with no extra install step.
+- **`skills/` — a standalone, distributable YNAB best-practices skill
+  library.** 15 Claude Agent Skills covering both live-budget workflows
+  (mirroring the 7 prompts above) and general budgeting/YNAB philosophy
+  coaching (getting started, debt payoff, irregular income, windfalls,
+  emergency funds, big goals, income-change prep) that work standalone, with
+  or without this MCP server connected. Packaged as downloadable zips on each
+  GitHub Release.
+
+### Security
+
+- Added `gitleaks` as a required CI check on every PR, scanning for
+  accidentally-committed secrets.
+
 ## [0.3.2]
 
 > Note: `0.3.1` was published to npm from a commit that bypassed code review and
