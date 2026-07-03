@@ -34,24 +34,28 @@ every other skill.
 ## Workflow
 
 ### Step 1: Check reconciliation status per account
+
 Call MCP tool: `ynab_reconciliation_helper`
 Parameters: account_id (optional — omit to check all accounts)
 
 ### Step 2: Find unused categories
+
 Call MCP tool: `ynab_unused_categories`
 Parameters: months: 6
 
 ### Step 3: Scan for sprawl
+
 Call MCP tool: `ynab_category_balances`
 Parameters: filter: "all"
 
 ### Step 4 (if confirmed): Merge or archive
+
 Call MCP tool: `ynab_update_category_group`
 Parameters: as needed — propose merges first, apply only after confirmation
 
 ## Output format
 
-```
+```text
 Uncleared transactions by account: [account: count, oldest pending date]
 Unused categories (no activity in 6mo): [list, current balance if any]
 Sprawl candidates (similar/overlapping categories): [suggested merges]

@@ -7,6 +7,10 @@
 
 import type { Prompt, PromptMessage } from '@modelcontextprotocol/sdk/types.js';
 
+// Matches the YYYY-MM-01 format the underlying ynab_budget_vs_actuals tool expects
+// (same pattern used in src/tools/analytics/budget-vs-actuals.ts).
+const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])-01$/;
+
 export const monthlyReviewPrompt: Prompt = {
   name: 'ynab-monthly-review',
   description:
@@ -24,7 +28,10 @@ export function buildMonthlyReviewMessages(args: Record<string, string>): {
   description: string;
   messages: PromptMessage[];
 } {
-  const month = args['month'];
+  // A malformed month (wrong format, or an attempt to inject extra text into the
+  // prompt) is treated the same as no month at all, rather than interpolated raw.
+  const rawMonth = args['month'];
+  const month = rawMonth && MONTH_PATTERN.test(rawMonth) ? rawMonth : undefined;
   const monthClause = month ? ` for ${month}` : '';
 
   return {

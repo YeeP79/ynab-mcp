@@ -34,28 +34,33 @@ category (use `ynab-overspending-triage`).
 ## Workflow
 
 ### Step 1: Detect recurring charges
+
 Call MCP tool: `ynab_detect_recurring`
 Parameters: months: 6
 
 ### Step 2: Cross-check against existing categories
+
 Call MCP tool: `ynab_list_categories` and `ynab_unused_categories`
 Parameters: months: 6
 
 ### Step 3: Analyze irregular-category history
+
 Call MCP tool: `ynab_spending_analysis` or `ynab_spending_trends`
 Parameters: category_id of the irregular category, if known
 
 ### Step 4: Propose funding and scheduling
+
 Call MCP tool: `ynab_create_category` / `ynab_update_category` (if a category doesn't exist)
 Call MCP tool: `ynab_preview_scheduled_transaction` then `ynab_create_scheduled_transaction` (for unscheduled recurring charges)
 
 ### Step 5: Sanity-check the new commitment
+
 Call MCP tool: `ynab_cash_flow_forecast`
 Parameters: days: 30
 
 ## Output format
 
-```
+```text
 Detected recurring charges not yet scheduled: [payee, amount, cadence]
 True-expense categories to fund:
 - [Category]: est. $X/yr → $Y/mo (due in N months)

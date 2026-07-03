@@ -35,24 +35,28 @@ forecast), or fixing overspending that's causing a low Age of Money (use
 ## Workflow
 
 ### Step 1: Get Age of Money
+
 Call MCP tool: `ynab_age_of_money`
 Parameters: none
 
 ### Step 2: Check credit card float
+
 Call MCP tool: `ynab_credit_card_status`
 Parameters: none
 
 ### Step 3: Forecast near-term cash flow
+
 Call MCP tool: `ynab_cash_flow_forecast`
 Parameters: days: 30
 
 ### Step 4: Check savings-rate trend for context
+
 Call MCP tool: `ynab_income_expense`
 Parameters: months: 6
 
 ## Output format
 
-```
+```text
 Age of Money: N days [status tier + one relevant tip]
 Credit card float check: card balance $X vs. payment category $Y →
   shortfall $Z (or "none — you're covered")

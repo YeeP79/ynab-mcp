@@ -35,28 +35,33 @@ skill if the MCP isn't yet connected or the budget has no history).
 ## Workflow
 
 ### Step 1: Check Ready to Assign
+
 Call MCP tool: `ynab_quick_summary`
 Parameters: none
 
 ### Step 2: Find unfunded categories
+
 Call MCP tool: `ynab_category_balances`
 Parameters: filter: "unfunded"
 
 ### Step 3: Find underfunded goals
+
 Call MCP tool: `ynab_goal_progress`
 Parameters: filter: "underfunded"
 
 ### Step 4: Get funding suggestions from history
+
 Call MCP tool: `ynab_budget_suggestions`
 Parameters: none
 
 ### Step 5 (if needed): Create or update categories
+
 Call MCP tool: `ynab_create_category_group` / `ynab_create_category` / `ynab_update_category`
 Parameters: as needed — propose first, confirm, then apply
 
 ## Output format
 
-```
+```text
 Ready to Assign: $X to give a job
 Priority funding order:
 1. [underfunded goal categories, amount needed]

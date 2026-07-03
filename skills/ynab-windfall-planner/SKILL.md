@@ -34,11 +34,13 @@ or `ynab-emergency-fund-builder` — it decides the split across them.
 ## Workflow
 
 ### Step 1 (if MCP-connected): Check current state
+
 Call MCP tool: `ynab_quick_summary`
 Call MCP tool: `ynab_category_balances`
 Call MCP tool: `ynab_goal_progress`
 
 ### Step 2: Walk the prioritization order
+
 Present this order, explaining that windfalls are a decision point, not
 something to let dissolve into a balance:
 1. **High-interest debt** — if a credit card or similar is carrying a
@@ -53,18 +55,20 @@ something to let dissolve into a balance:
    something enjoyable; the point is an active decision, not zero fun.
 
 ### Step 3: Flag "getting a month ahead" as an accelerant
+
 If the person describes living paycheck-to-paycheck, note that a windfall is
 a common and effective way to jump-start funding next month's expenses ahead
 of time — one of YNAB's highest-leverage milestones.
 
 ### Step 4: Caution against snap decisions
+
 Especially for emotionally-charged money (inheritance, settlement),
 recommend not deciding in the first sitting — park it in a holding category
 for a few days if the amount is large.
 
 ## Output format
 
-```
+```text
 Windfall amount: $X
 Current state: [debt balances / emergency fund level / behind categories /
   active goals, from live data if available]

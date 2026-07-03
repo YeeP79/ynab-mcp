@@ -34,6 +34,7 @@ budgeting at all).
 ## Workflow
 
 ### Step 1: Pick a category-group pattern
+
 Walk through YNAB's three beginner patterns and let the person choose
 whichever fits how they naturally think about money — there's no single
 correct answer:
@@ -43,18 +44,21 @@ correct answer:
 - **Pin It to the Paycheck** — group by which paycheck/pay period covers it.
 
 ### Step 2: Set the right level of detail
+
 Recommend starting around **15-25 categories**, not more. Explain that new
 categories should "earn their way in" as real spending reveals a genuine gap
 — not be pre-built for every hypothetical expense. Over-detailed budgets are
 a top reason new users quit within the first month.
 
 ### Step 3: Sequence the rules
+
 Explicitly recommend NOT trying to apply all Four Rules simultaneously in
 month one. Start with **Give Every Dollar a Job** only; layer in True
 Expenses, Roll With the Punches, and Age of Money as the budget matures over
 the following months.
 
 ### Step 4 (if MCP-connected): Build the chosen structure
+
 If the ynab-mcp server is connected, offer to build it directly:
 Call MCP tool: `ynab_list_categories` — to see what already exists
 Call MCP tool: `ynab_create_category_group` and `ynab_create_category` — to build the chosen structure, one group at a time, with confirmation before each write
@@ -64,7 +68,7 @@ that the person can build it themselves in the YNAB app.
 
 ## Output format
 
-```
+```text
 Recommended pattern: [Mandatory & Optional / Themed / Pin It to the Paycheck]
 Starting categories (15-25):
   [Group]: [category, category, ...]

@@ -24,7 +24,7 @@ import { RateLimiter } from './services/rate-limiter.js';
 import { Cache } from './services/cache.js';
 import { AuditLog } from './services/audit-log.js';
 import { tools, handleToolCall } from './tools/index.js';
-import { prompts, getPromptMessages } from './prompts/index.js';
+import { prompts, getPromptMessages, sanitizePromptName } from './prompts/index.js';
 import { formatErrorResponse } from './utils/errors.js';
 
 /**
@@ -105,7 +105,7 @@ export function createServerFromClient(ynabClient: YnabClient): Server {
     try {
       return getPromptMessages(name, args ?? {});
     } catch {
-      throw new McpError(ErrorCode.InvalidParams, `Unknown prompt: ${name.slice(0, 100).replace(/[\r\n]/g, '')}`);
+      throw new McpError(ErrorCode.InvalidParams, `Unknown prompt: ${sanitizePromptName(name)}`);
     }
   });
 

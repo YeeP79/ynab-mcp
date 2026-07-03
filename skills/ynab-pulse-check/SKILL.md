@@ -34,24 +34,28 @@ flow" (use `ynab-age-of-money`).
 ## Workflow
 
 ### Step 1: Get the overview
+
 Call MCP tool: `ynab_quick_summary`
 Parameters: none
 
 ### Step 2: Get the health score
+
 Call MCP tool: `ynab_budget_health`
 Parameters: none
 
 ### Step 3: Check for overspending
+
 Call MCP tool: `ynab_overspending_alerts`
 Parameters: none
 
 ### Step 4: Check spending pace
+
 Call MCP tool: `ynab_spending_pace`
 Parameters: none
 
 ## Output format
 
-```
+```text
 YNAB Pulse Check — [date]
 Ready to Assign: $X | Health Score: NN/100
 Overspent categories: [list, or "none"]

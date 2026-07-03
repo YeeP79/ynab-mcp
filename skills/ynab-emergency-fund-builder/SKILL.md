@@ -33,6 +33,7 @@ one lump sum across several priorities (use `ynab-windfall-planner`).
 ## Workflow
 
 ### Step 1: Set the staged milestones
+
 Present the staged approach rather than one big number:
 1. **Starter fund**: ~$500 — enough to absorb a small surprise without going
    into debt.
@@ -41,6 +42,7 @@ Present the staged approach rather than one big number:
    irregular — see `ynab-irregular-income-planner`).
 
 ### Step 2: Name specific categories, not one catch-all
+
 Recommend breaking "Emergency Fund" into a few named sub-categories tied to
 real, plausible emergencies (e.g. Car Repair, Tech Replacement, Medical) —
 this makes the fund feel concrete and makes it easier to say yes to a
@@ -48,18 +50,20 @@ withdrawal when the specific thing it was for actually happens, rather than
 feeling like raiding a vague pile of savings.
 
 ### Step 3 (if MCP-connected): Set it up
+
 Call MCP tool: `ynab_create_category` — for each named emergency sub-category
 Call MCP tool: `ynab_goal_progress` — to track progress toward each stage
 Call MCP tool: `ynab_category_balances` — to check current funding level
 
 ### Step 4: Suggest the funding mechanism
+
 Recommend small automated weekly/monthly transfers as the base, with
 windfalls (see `ynab-windfall-planner`) as accelerants to jump between
 stages faster.
 
 ## Output format
 
-```
+```text
 Current stage: [none / starter / intermediate / full buffer]
 Next milestone: $X (currently at $Y)
 Suggested categories: [Car Repair, Tech Replacement, Medical, ...]

@@ -37,40 +37,48 @@ flags those but doesn't do the full workup).
 ## Workflow
 
 ### Step 1: Category-level plan vs. actual
+
 Call MCP tool: `ynab_budget_vs_actuals`
 Parameters: month (optional, defaults to current), include_previous: true
 
 ### Step 2: Month-over-month comparison
+
 Call MCP tool: `ynab_monthly_comparison`
 Parameters: none
 
 ### Step 3: Income and savings trend
+
 Call MCP tool: `ynab_income_expense`
 Parameters: months: 6
 
 ### Step 4: Goal progress
+
 Call MCP tool: `ynab_goal_progress`
 Parameters: filter: "all"
 
 ### Step 5: Net worth
+
 Call MCP tool: `ynab_net_worth`
 Parameters: none
 
 ### Step 6: Age of Money (one-line check, not a deep dive)
+
 Call MCP tool: `ynab_age_of_money`
 Parameters: none
 
 ### Step 7: Reconciliation status (flag only, not a deep dive)
+
 Call MCP tool: `ynab_reconciliation_helper`
 Parameters: none
 
 ### Step 8: Next month's suggested budget
+
 Call MCP tool: `ynab_budget_suggestions`
 Parameters: months: 3
 
 ## Output format
 
-```
+```text
 Monthly Review — [Month Year]
 1. Scorecard: budgeted vs. actual by category group, variance %, status
 2. What changed vs. last month (top 3 movers)

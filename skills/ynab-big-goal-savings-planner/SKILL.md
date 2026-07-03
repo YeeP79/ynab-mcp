@@ -32,27 +32,31 @@ Assign across all goals at once (use `ynab-assign-money`).
 ## Workflow
 
 ### Step 1: Set the target amount and date
+
 Establish the dollar target and target date. For a house down payment
 specifically, flag YNAB's guidance to add **5-10% on top** of the down
 payment figure to cover closing costs — a very common shortfall if skipped.
 
 ### Step 2: Calculate the required monthly contribution
+
 Target amount ÷ months remaining = required monthly contribution. Frame this
 number as non-negotiable, the same way a true-expense category is — not
 something to fund only with leftover money at the end of the month.
 
 ### Step 3 (if MCP-connected): Set it up and track it
+
 Call MCP tool: `ynab_create_category` — a dedicated category for this goal
 Call MCP tool: `ynab_goal_progress` — using YNAB's "Have a balance of... by [date]" target-date goal type, distinct from an open-ended goal with no date
 
 ### Step 4: Sanity-check against the rest of the budget
+
 If the required monthly contribution looks unrealistic against current
 income/expenses, say so plainly and offer to either extend the timeline or
 reduce the target — don't let an unrealistic number stand unexamined.
 
 ## Output format
 
-```
+```text
 Goal: [description] — $X target by [date]
   (if down payment: includes +5-10% for closing costs: $Y adjusted target)
 Months remaining: N

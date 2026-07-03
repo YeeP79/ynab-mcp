@@ -38,14 +38,18 @@ const builders: Record<string, PromptMessageBuilder> = {
   'ynab-reconcile-cleanup': () => buildReconcileCleanupMessages(),
 };
 
+/** Truncate and strip newlines from an untrusted prompt name before it's echoed back (e.g. in an error message). */
+export function sanitizePromptName(name: string): string {
+  return name.slice(0, 100).replace(/[\r\n]/g, '');
+}
+
 /**
  * Build the messages for a prompt call.
  */
 export function getPromptMessages(name: string, args: Record<string, string>): GetPromptResult {
   // Guard against prototype pollution - only allow own properties
   if (!Object.prototype.hasOwnProperty.call(builders, name)) {
-    const safeName = name.slice(0, 100).replace(/[\r\n]/g, '');
-    throw new Error(`Unknown prompt: ${safeName}`);
+    throw new Error(`Unknown prompt: ${sanitizePromptName(name)}`);
   }
 
   const builder = builders[name] as PromptMessageBuilder;

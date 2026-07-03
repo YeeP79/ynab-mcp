@@ -34,28 +34,33 @@ allocation of unassigned money.
 ## Workflow
 
 ### Step 1: Find overspent categories
+
 Call MCP tool: `ynab_overspending_alerts`
 Parameters: threshold (optional, minimum $ to report)
 
 ### Step 2: Get variance context
+
 Call MCP tool: `ynab_budget_vs_actuals`
 Parameters: none
 
 ### Step 3: Find categories with slack
+
 Call MCP tool: `ynab_category_balances`
 Parameters: filter: "positive"
 
 ### Step 4: Find cut opportunities
+
 Call MCP tool: `ynab_savings_opportunities`
 Parameters: months: 3
 
 ### Step 5: Identify the specific merchants driving overspending
+
 Call MCP tool: `ynab_spending_by_payee`
 Parameters: none
 
 ## Output format
 
-```
+```text
 Overspent now: [category: -$amount, days until it resets]
 Candidates to pull from (positive balance, low priority): [category: $available]
 Suggested moves: move $X from [A] → [B]

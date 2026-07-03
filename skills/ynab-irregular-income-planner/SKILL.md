@@ -34,6 +34,7 @@ not diagnosing current health.
 ## Workflow
 
 ### Step 1: Establish the core rule
+
 Budget only money that has already arrived — never forecast or budget
 against an expected future payment. This is the opposite instinct from most
 income-planning advice, so it's worth stating explicitly and explaining why:
@@ -41,6 +42,7 @@ forecasted income that doesn't arrive on schedule is what causes variable
 earners to overspend into a shortfall.
 
 ### Step 2 (if MCP-connected): Establish a baseline
+
 Call MCP tool: `ynab_income_expense` — pull several months of actual income/expense history
 Call MCP tool: `ynab_quick_summary` — current Ready to Assign state
 
@@ -48,6 +50,7 @@ If not connected, ask the person for their lowest 2-3 months of income over
 the last year as a rough floor.
 
 ### Step 3: Set the spending baseline
+
 Calculate an average monthly expense baseline from real spending, then cap
 monthly spending to that baseline regardless of how much came in that
 specific month. In high-earning months, the surplus is assigned forward to
@@ -55,6 +58,7 @@ future months' categories, not spent — this is the "pay yourself a salary"
 pattern.
 
 ### Step 4: Set a larger buffer target
+
 Because income is less predictable, recommend a larger emergency/buffer
 target than a steady-paycheck household — **6-12 months** of expenses versus
 the standard 3-6 months. Point to `ynab-emergency-fund-builder` for the
@@ -62,7 +66,7 @@ staged plan to get there.
 
 ## Output format
 
-```
+```text
 Baseline monthly expense: $X (from Y months of history, or user-estimated)
 This month's income: $Z received
   → if Z > X: assign $(Z-X) forward to future months

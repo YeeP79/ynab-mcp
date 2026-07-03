@@ -33,20 +33,24 @@ cushion against unnamed/general risk (use `ynab-emergency-fund-builder`).
 ## Workflow
 
 ### Step 1: Quantify the gap
+
 Establish the expected reduced income (or $0, for leave/layoff) and how long
 the reduced period is expected to last. For job-loss risk specifically,
 treat the duration as unknown and plan conservatively.
 
 ### Step 2 (if MCP-connected): Establish the real baseline
+
 Call MCP tool: `ynab_income_expense` — current income/spending baseline
 Call MCP tool: `ynab_budget_vs_actuals` — category-level detail to distinguish trim-able vs. protect
 
 ### Step 3: Build a dedicated Income Replacement category
+
 Fund it ahead of time, sized to bridge the anticipated gap. This is distinct
 from the general emergency fund — it's specifically earmarked for this known
 change.
 
 ### Step 4: Categorize trim vs. protect
+
 Go category by category: which spending gets cut during the reduced-income
 period, and which stays protected (housing, insurance, minimum debt
 payments). For job-loss risk specifically, flag two commonly-missed costs:
@@ -54,13 +58,14 @@ payments). For job-loss risk specifically, flag two commonly-missed costs:
 right when income drops, which is exactly the wrong time to discover them.
 
 ### Step 5: Practice-run the reduced budget
+
 Recommend running the trimmed budget for a few months *before* the actual
 change, if there's lead time — this surfaces problems with the plan while
 there's still full income to patch them.
 
 ## Output format
 
-```
+```text
 Anticipated change: [type] starting [date/timeframe], duration: [known/unknown]
 Income gap to bridge: $X/month for N months
 Income Replacement category target: $Y
