@@ -34,6 +34,7 @@ const mockApi = vi.hoisted(() => {
       getMonthCategoryById: fn(),
       updateMonthCategory: fn(),
       createCategory: fn(),
+      updateCategory: fn(),
       createCategoryGroup: fn(),
       updateCategoryGroup: fn(),
     },
@@ -421,6 +422,9 @@ describe('write methods - read-only mode rejection', () => {
       } as never)
     ).rejects.toThrow(ReadOnlyModeError);
     await expect(
+      client.updateCategory(BUDGET, 'c-1', { category: { name: 'C' } } as never)
+    ).rejects.toThrow(ReadOnlyModeError);
+    await expect(
       client.createCategory(BUDGET, { category: { name: 'C' } } as never)
     ).rejects.toThrow(ReadOnlyModeError);
     await expect(
@@ -554,6 +558,33 @@ describe('updateMonthCategory (write)', () => {
         category: { budgeted: 1 },
       } as never)
     ).rejects.toThrow('nope');
+    expect(getAuditLog().getAll()[0]).toMatchObject({ success: false });
+  });
+});
+
+describe('updateCategory (write)', () => {
+  it('succeeds and logs which fields changed, not their values', async () => {
+    const client = makeClient(false);
+    setResolve(mockApi.categories.updateCategory, { data: { category: { id: 'cat-1' } } });
+    await client.updateCategory(BUDGET, 'cat-1', {
+      category: { name: 'Private name', goal_target: 1000 },
+    } as never);
+    const entry = getAuditLog().getAll()[0];
+    expect(entry).toMatchObject({
+      tool: 'ynab_update_category_details',
+      resourceId: 'cat-1',
+      details: { fields: ['goal_target', 'name'] },
+      success: true,
+    });
+    expect(JSON.stringify(entry)).not.toContain('Private name');
+  });
+
+  it('logs failure and rethrows', async () => {
+    const client = makeClient(false);
+    setReject(mockApi.categories.updateCategory, new Error('fail'));
+    await expect(
+      client.updateCategory(BUDGET, 'cat-1', { category: { name: 'X' } } as never)
+    ).rejects.toThrow('fail');
     expect(getAuditLog().getAll()[0]).toMatchObject({ success: false });
   });
 });

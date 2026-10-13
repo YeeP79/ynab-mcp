@@ -41,6 +41,7 @@
     "ynab_get_category",
     "ynab_get_month_category",
     "ynab_update_category",
+    "ynab_update_category_details",
     "ynab_create_category",
     "ynab_create_category_group",
     "ynab_update_category_group",

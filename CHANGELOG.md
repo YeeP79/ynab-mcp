@@ -46,6 +46,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `mcpb/` and `npm run build:mcpb`: a Claude Desktop extension (MCP Bundle) that
   bridges stdio to a remote HTTP server using an `MCP_API_KEYS` key, so client
   machines need no Node.js install.
+- `ynab_update_category_details`: rename a category, move it to another group,
+  edit its note, or set or remove its target (amount, date, and "set aside" vs
+  "refill up to"). `ynab_create_category` accepts the same target fields.
 - `since_date: "all"` (or `"all time"`) on the transaction tools above returns
   full history.
 

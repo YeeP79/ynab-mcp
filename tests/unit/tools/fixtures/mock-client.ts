@@ -41,6 +41,7 @@ export function createMockClient() {
     getCategoryById: vi.fn(),
     getMonthCategoryById: vi.fn(),
     updateMonthCategory: vi.fn(),
+    updateCategory: vi.fn(),
     createCategory: vi.fn(),
     createCategoryGroup: vi.fn(),
     updateCategoryGroup: vi.fn(),

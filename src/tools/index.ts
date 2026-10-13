@@ -35,6 +35,10 @@ import {
 import { updateCategoryTool, handleUpdateCategory } from './categories/update-category.js';
 import { createCategoryTool, handleCreateCategory } from './categories/create-category.js';
 import {
+  updateCategoryDetailsTool,
+  handleUpdateCategoryDetails,
+} from './categories/update-category-details.js';
+import {
   createCategoryGroupTool,
   handleCreateCategoryGroup,
 } from './categories/create-category-group.js';
@@ -216,6 +220,7 @@ export const tools: Tool[] = [
   getCategoryTool,
   getMonthCategoryTool,
   updateCategoryTool,
+  updateCategoryDetailsTool,
   createCategoryTool,
   createCategoryGroupTool,
   updateCategoryGroupTool,
@@ -299,6 +304,7 @@ const handlers: Record<string, ToolHandler> = {
   ynab_get_category: handleGetCategory,
   ynab_get_month_category: handleGetMonthCategory,
   ynab_update_category: handleUpdateCategory,
+  ynab_update_category_details: handleUpdateCategoryDetails,
   ynab_create_category: handleCreateCategory,
   ynab_create_category_group: handleCreateCategoryGroup,
   ynab_update_category_group: handleUpdateCategoryGroup,

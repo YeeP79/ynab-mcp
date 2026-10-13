@@ -16,13 +16,13 @@ Traditional YNAB integrations require manual API calls or custom scripting. This
 - **Talk to your budget naturally** — Ask Claude "Am I overspending on dining out?" and get instant insights
 - **Get AI-powered financial analysis** — Subscription detection, spending trends, savings recommendations, and budget health scores
 - **Stay safe by default** — Read-only mode protects against accidental changes
-- **Access everything** — 66 tools total: comprehensive YNAB API coverage (40 tools), 23 custom analytics tools, and 3 system tools
+- **Access everything** — 67 tools total: comprehensive YNAB API coverage (41 tools), 23 custom analytics tools, and 3 system tools
 
 ## Features
 
 | Feature | Description |
 |---------|-------------|
-| **Broad API Coverage** | 66 MCP tools spanning the YNAB API endpoints |
+| **Broad API Coverage** | 67 MCP tools spanning the YNAB API endpoints |
 | **Advanced Analytics** | 23 tools for spending analysis, trend detection, and financial insights |
 | **Read-Only by Default** | Write operations require explicit opt-in (`YNAB_READ_ONLY=false`) |
 | **Smart Rate Limiting** | Token bucket algorithm with 180 req/hour budget (10% safety margin) |
@@ -209,7 +209,7 @@ Once connected, try asking Claude:
 | "Am I on track this month?" | `ynab_spending_pace` |
 | "Compare this month to last month" | `ynab_monthly_comparison` |
 
-## Available Tools (66 Total)
+## Available Tools (67 Total)
 
 ### Analytics Tools (23)
 
@@ -274,6 +274,7 @@ Coverage of the YNAB API endpoints:
 - `ynab_get_category` — Get category details
 - `ynab_get_month_category` — Get category budget for specific month
 - `ynab_update_category` — Update category budgeted amount *(write mode)*
+- `ynab_update_category_details` — Rename, move, edit the note of, or set the target of a category *(write mode)*
 - `ynab_create_category` — Create a new category in a group *(write mode)*
 - `ynab_create_category_group` — Create a new category group *(write mode)*
 - `ynab_update_category_group` — Rename a category group *(write mode)*

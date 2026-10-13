@@ -6,8 +6,15 @@
 
 import { z } from 'zod';
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
+import type * as ynab from 'ynab';
 import type { YnabClient } from '../../services/ynab-client.js';
 import { sanitizeName } from '../../utils/sanitize.js';
+import {
+  describeTarget,
+  targetInputShape,
+  targetJsonSchemaProperties,
+  toTargetFields,
+} from './category-target.js';
 
 // Input schema
 const inputSchema = z.object({
@@ -21,6 +28,10 @@ const inputSchema = z.object({
     .describe('The UUID of the category group to add the category to'),
   name: z.string().min(1).max(500).describe('The name of the new category'),
   note: z.string().max(500).optional().describe('Optional note for the category'),
+  // A new category has no target to remove, so null is not accepted here.
+  target_amount: targetInputShape.target_amount.unwrap().unwrap().optional(),
+  target_date: targetInputShape.target_date.unwrap().unwrap().optional(),
+  target_behavior: targetInputShape.target_behavior,
 });
 
 // Tool definition
@@ -31,8 +42,10 @@ export const createCategoryTool: Tool = {
 Use when the user asks:
 - "Add a new category called X to my [group] group"
 - "Create a budgeting category for Y"
+- "Add a Pets category with a $150 monthly target"
 
 Requires a category_group_id. Use ynab_list_categories first to find the group ID.
+Optionally sets a target: target_amount creates a monthly "Needed for Spending" target.
 
 **Note:** This is a write operation. Requires YNAB_READ_ONLY=false.`,
   inputSchema: {
@@ -54,6 +67,14 @@ Requires a category_group_id. Use ynab_list_categories first to find the group I
         type: 'string',
         description: 'Optional note for the category',
       },
+      target_amount: {
+        ...targetJsonSchemaProperties.target_amount,
+        type: 'number',
+        description:
+          'Optional target amount in dollars. Creates a monthly "Needed for Spending" target.',
+      },
+      target_date: { ...targetJsonSchemaProperties.target_date, type: 'string' },
+      target_behavior: targetJsonSchemaProperties.target_behavior,
     },
     required: ['category_group_id', 'name'],
   },
@@ -75,6 +96,10 @@ export async function handleCreateCategory(
       name: validated.name,
       category_group_id: validated.category_group_id,
       ...(validated.note !== undefined ? { note: validated.note } : {}),
+      ...(toTargetFields(validated) as Pick<
+        ynab.NewCategory,
+        'goal_target' | 'goal_target_date' | 'goal_needs_whole_amount'
+      >),
     },
   });
 
@@ -88,6 +113,7 @@ export async function handleCreateCategory(
         id: category.id,
         name: sanitizeName(category.name),
         category_group_id: category.category_group_id,
+        target: describeTarget(category),
       },
     },
     null,

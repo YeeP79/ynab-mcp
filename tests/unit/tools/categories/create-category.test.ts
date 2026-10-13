@@ -58,6 +58,54 @@ describe('handleCreateCategory', () => {
     });
   });
 
+  it('creates a target when target fields are given', async () => {
+    mockClient.createCategory.mockResolvedValue({
+      data: {
+        category: {
+          ...createdCategoryResponse().data.category,
+          goal_type: 'NEED',
+          goal_target: 150000,
+          goal_needs_whole_amount: true,
+        },
+      },
+    });
+
+    const result = await handleCreateCategory(
+      {
+        category_group_id: GROUP_ID,
+        name: 'Pet Supplies',
+        target_amount: 150,
+        target_behavior: 'set_aside',
+      },
+      mockClient as never
+    );
+    const parsed = JSON.parse(result);
+
+    expect(mockClient.createCategory).toHaveBeenCalledWith('test-budget-id', {
+      category: {
+        name: 'Pet Supplies',
+        category_group_id: GROUP_ID,
+        goal_target: 150000,
+        goal_needs_whole_amount: true,
+      },
+    });
+    expect(parsed.category.target).toEqual({
+      type: 'NEED',
+      amount: '$150.00',
+      target_date: null,
+      behavior: 'set_aside',
+    });
+  });
+
+  it('rejects a null target amount on create', async () => {
+    await expect(
+      handleCreateCategory(
+        { category_group_id: GROUP_ID, name: 'X', target_amount: null },
+        mockClient as never
+      )
+    ).rejects.toThrow();
+  });
+
   it('respects budget_id parameter', async () => {
     mockClient.createCategory.mockResolvedValue(createdCategoryResponse());
 

@@ -275,6 +275,46 @@ export class YnabClient {
     }
   }
 
+  async updateCategory(
+    budgetId: string,
+    categoryId: string,
+    data: ynab.PatchCategoryWrapper
+  ): Promise<ynab.SaveCategoryResponse> {
+    this.assertWriteAllowed('updateCategory');
+    await this.rateLimiter.acquire();
+    // Invalidate categories cache after updating
+    this.cache.delete(`categories:${budgetId}`);
+
+    // Category names and notes may be sensitive; log which fields changed.
+    const details = { fields: Object.keys(data.category).sort() };
+    const auditLog = this.auditLog;
+    try {
+      const response = await this.api.categories.updateCategory(budgetId, categoryId, data);
+      auditLog.log({
+        operation: 'update',
+        tool: 'ynab_update_category_details',
+        budgetId,
+        resourceType: 'category',
+        resourceId: categoryId,
+        details,
+        success: true,
+      });
+      return response;
+    } catch (error) {
+      auditLog.log({
+        operation: 'update',
+        tool: 'ynab_update_category_details',
+        budgetId,
+        resourceType: 'category',
+        resourceId: categoryId,
+        details,
+        success: false,
+        error: sanitizeErrorMessage(error),
+      });
+      throw error;
+    }
+  }
+
   async createCategory(
     budgetId: string,
     data: ynab.PostCategoryWrapper
