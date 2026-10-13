@@ -5,6 +5,50 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **Transaction tools silently returned only recent history when `since_date`
+  was omitted.** The YNAB API applies an undocumented server-side window when
+  no `since_date` is sent (about 30 days for plain lists, about one year with a
+  `type` filter), and nothing in the response says so. `ynab_list_transactions`,
+  `ynab_list_account_transactions`, `ynab_list_category_transactions`,
+  `ynab_list_payee_transactions` and `ynab_transaction_search` now always send
+  an explicit date: the last 30 days by default, and report it in the response
+  (`date_filter` / `filters_applied.since_date`, with a note when the default
+  was applied).
+- `ynab_transaction_search` reported `date_range.from: "beginning"` while
+  searching only the server's default window; it now reports the date used.
+- Transaction list tools dropped the bank's original description
+  (`import_payee_name_original`), the most useful clue for identifying an
+  unfamiliar payee. The list tools and `ynab_transaction_search` now return it,
+  and search's `query`/`payee` filters match against it. `ynab_get_transaction`
+  returns `null` instead of `"Unknown"` for these fields on transactions that
+  weren't imported.
+
+### Security
+
+- **HTTP header mode no longer serves the server-held token to the whole
+  network by default.** A request without `X-YNAB-Token` falls back to
+  `YNAB_ACCESS_TOKEN`; the server now refuses to start when that token is set,
+  `HOST` is not loopback and no `MCP_API_KEYS` are configured (override:
+  `ALLOW_UNAUTHENTICATED_FALLBACK=true`, for an authenticating proxy).
+- Sessions using the same YNAB token now share one rate limiter. YNAB limits
+  per token, so per-session limiters could together exceed it.
+
+### Added
+
+- `MCP_API_KEYS`: named shared-secret client keys for LAN or self-hosted use.
+  Clients authenticate with `Authorization: Bearer <key>` and the YNAB token
+  stays on the server.
+- `HOST`: interface to bind in http mode.
+- `mcpb/` and `npm run build:mcpb`: a Claude Desktop extension (MCP Bundle) that
+  bridges stdio to a remote HTTP server using an `MCP_API_KEYS` key, so client
+  machines need no Node.js install.
+- `since_date: "all"` (or `"all time"`) on the transaction tools above returns
+  full history.
+
 ## [0.3.3]
 
 ### Added

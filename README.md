@@ -88,6 +88,8 @@ client/cache/rate-limiter/audit-log.
 |----------|-------------|
 | `MCP_TRANSPORT` | `stdio` (default) or `http` |
 | `PORT` | HTTP port (default `3000`) |
+| `HOST` | Interface to bind (default: all interfaces) |
+| `MCP_API_KEYS` | Comma-separated `name:key` client keys (header mode); see below |
 | `ALLOWED_HOSTS` / `ALLOWED_ORIGINS` | Comma-separated allowlists for DNS-rebinding protection |
 | `ENABLE_DNS_REBINDING_PROTECTION` | Enable Origin/Host checks (needs an allowlist) |
 
@@ -107,6 +109,32 @@ MCP_TRANSPORT=http PORT=3000 YNAB_ACCESS_TOKEN=… npm start
 # connect an MCP client via the mcp-remote shim:
 npx mcp-remote http://localhost:3000/mcp --header "X-YNAB-Token: <your-token>"
 ```
+
+**Sharing one YNAB account across machines (LAN / self-hosted).** Keep the YNAB
+token on the server and give each client machine its own key. Clients send
+`Authorization: Bearer <key>`, never the YNAB token, and a key can be revoked
+by removing it. All sessions on one YNAB token share a single rate limiter.
+
+```bash
+MCP_TRANSPORT=http HOST=192.168.1.20 PORT=3000 YNAB_ACCESS_TOKEN=… \
+  MCP_API_KEYS="laptop:$(openssl rand -hex 32),desktop:$(openssl rand -hex 32)" \
+  ENABLE_DNS_REBINDING_PROTECTION=true ALLOWED_HOSTS=192.168.1.20:3000 npm start
+# on a client (mcp-remote needs --allow-http for plain HTTP to a non-localhost host):
+npx mcp-remote http://192.168.1.20:3000/mcp --allow-http --header "Authorization: Bearer <key>"
+```
+
+**Claude Desktop clients without Node.js.** `npm run build:mcpb` produces
+`ynab-mcp-remote.mcpb`, an MCP Bundle containing a small stdio-to-HTTP bridge.
+Install it from Claude Desktop's Settings → Extensions; it asks for the server URL
+and the machine's API key (stored as a secret) and runs on Claude Desktop's
+built-in Node.js, so nothing else is installed on the client.
+
+> For safety, header mode **refuses to start** when `YNAB_ACCESS_TOKEN` is set,
+> `HOST` is not a loopback address and `MCP_API_KEYS` is empty, because every
+> client on the network would otherwise get full access. Set
+> `ALLOW_UNAUTHENTICATED_FALLBACK=true` only behind an authenticating proxy.
+> Without TLS, keys cross the network in clear text; use a reverse proxy with a
+> certificate on untrusted networks.
 
 ### Claude Desktop Integration
 
