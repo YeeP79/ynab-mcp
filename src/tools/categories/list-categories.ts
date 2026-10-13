@@ -8,7 +8,7 @@ import { z } from 'zod';
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { YnabClient } from '../../services/ynab-client.js';
 import { formatCurrency } from '../../utils/milliunits.js';
-import { sanitizeName } from '../../utils/sanitize.js';
+import { sanitizeMemo, sanitizeName } from '../../utils/sanitize.js';
 
 // Input schema
 const inputSchema = z.object({
@@ -85,6 +85,7 @@ export async function handleListCategories(
       categories: categories.map((cat) => ({
         id: cat.id,
         name: sanitizeName(cat.name),
+        ...(cat.note ? { note: sanitizeMemo(cat.note) } : {}),
         budgeted: formatCurrency(cat.budgeted),
         activity: formatCurrency(cat.activity),
         balance: formatCurrency(cat.balance),

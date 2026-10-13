@@ -26,6 +26,7 @@ import { AuditLog } from './services/audit-log.js';
 import { tools, handleToolCall } from './tools/index.js';
 import { prompts, getPromptMessages, sanitizePromptName } from './prompts/index.js';
 import { formatErrorResponse } from './utils/errors.js';
+import { SERVER_INSTRUCTIONS } from './instructions.js';
 
 /**
  * Per-user context for building an isolated server instance. In multi-tenant
@@ -78,6 +79,7 @@ export function createServerFromClient(ynabClient: YnabClient): Server {
         tools: {},
         prompts: {},
       },
+      instructions: SERVER_INSTRUCTIONS,
     }
   );
 

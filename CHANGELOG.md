@@ -59,6 +59,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   in on-budget balances (opening, closing, and a breakdown that always adds up),
   plus the largest inflows and income by payee.
 - `ynab-spending-report` prompt: a household report built on the two tools above.
+- Server instructions: clients such as Claude Desktop now receive a short guide
+  at connect (about 500 tokens, once per conversation) that maps everyday
+  questions to tools and asks the model to confirm before any write and to send
+  API-unsupported changes (hiding or deleting categories, closing accounts) to
+  the YNAB app. People no longer need to know tool names.
+- `ynab_list_categories` returns each category's note when it has one, so
+  notes can describe what belongs in a category.
+- Releases attach `ynab-mcp-remote.mcpb` alongside the skill zips.
 - `since_date: "all"` (or `"all time"`) on the transaction tools above returns
   full history.
 

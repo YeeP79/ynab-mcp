@@ -60,6 +60,19 @@ describe('handleListCategories', () => {
     expect(names).toContain('Hidden');
   });
 
+  it('includes a category note only when the category has one', async () => {
+    mockClient.getCategories.mockResolvedValue(createCategoriesResponse(mockCategoryGroups));
+
+    const parsed = JSON.parse(await handleListCategories({}, mockClient as never));
+    const categories = parsed.category_groups.flatMap(
+      (g: { categories: Array<Record<string, unknown>> }) => g.categories
+    );
+    const withNotes = categories.filter((c: Record<string, unknown>) => 'note' in c);
+    expect(withNotes.length).toBeGreaterThan(0);
+    for (const c of withNotes) expect(typeof c['note']).toBe('string');
+    expect(categories.some((c: Record<string, unknown>) => !('note' in c))).toBe(true);
+  });
+
   it('respects budget_id parameter', async () => {
     mockClient.getCategories.mockResolvedValue(createCategoriesResponse(mockCategoryGroups));
 
