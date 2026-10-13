@@ -8,6 +8,7 @@ import { z } from 'zod';
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { YnabClient } from '../../services/ynab-client.js';
 import { formatCurrency, sumMilliunits } from '../../utils/milliunits.js';
+import { buildCategoryIndex, toLedgerLines } from './ledger.js';
 
 // Input schema
 const inputSchema = z.object({
@@ -36,7 +37,9 @@ Use when the user asks:
 - "Show my cash flow"
 - "What's my savings rate?"
 
-Returns monthly income, expenses, net savings, and savings rate.`,
+Returns monthly income, expenses, net savings, and savings rate. Income is money
+assigned to Ready to Assign; expenses are net of refunds. Transfers, starting
+balances and uncategorized transactions are excluded (uncategorized is reported).`,
   inputSchema: {
     type: 'object',
     properties: {
@@ -87,31 +90,37 @@ export async function handleIncomeExpense(
     throw new Error('Failed to compute since date for income/expense analysis');
   }
 
-  // Get transactions
-  const transactionsResponse = await client.getTransactions(budgetId, {
-    sinceDate: sinceDateStr,
-  });
-
-  const transactions = transactionsResponse.data.transactions.filter(
-    (t) => !t.deleted && !t.transfer_account_id
+  // Get transactions and categories; the ledger decides what is income
+  // (Ready to Assign inflows) and spending (net of refunds, split lines counted
+  // separately), leaving out transfers, starting balances and uncategorized money.
+  const [transactionsResponse, categoriesResponse] = await Promise.all([
+    client.getTransactions(budgetId, { sinceDate: sinceDateStr }),
+    client.getCategories(budgetId),
+  ]);
+  const lines = toLedgerLines(
+    transactionsResponse.data.transactions,
+    buildCategoryIndex(categoriesResponse.data.category_groups)
   );
 
   // Group by month
   const byMonth = new Map<string, { income: number[]; expenses: number[] }>();
+  const uncategorized: number[] = [];
 
-  for (const txn of transactions) {
-    const month = txn.date.substring(0, 7); // YYYY-MM
+  for (const line of lines) {
+    if (line.kind === 'uncategorized') uncategorized.push(line.amount);
+    if (line.kind !== 'income' && line.kind !== 'spending') continue;
 
-    if (!byMonth.has(month)) {
-      byMonth.set(month, { income: [], expenses: [] });
+    if (!byMonth.has(line.month)) {
+      byMonth.set(line.month, { income: [], expenses: [] });
     }
 
-    const monthData = byMonth.get(month)!;
+    const monthData = byMonth.get(line.month)!;
 
-    if (txn.amount > 0) {
-      monthData.income.push(txn.amount);
+    if (line.kind === 'income') {
+      monthData.income.push(line.amount);
     } else {
-      monthData.expenses.push(Math.abs(txn.amount));
+      // Outflows are negative; a refund (positive) reduces expenses.
+      monthData.expenses.push(-line.amount);
     }
   }
 
@@ -225,6 +234,15 @@ export async function handleIncomeExpense(
         net_savings: formatCurrency(totalNet),
         savings_rate: overallSavingsRate !== null ? `${Math.round(overallSavingsRate)}%` : 'N/A',
       },
+      ...(uncategorized.length > 0
+        ? {
+            uncategorized: {
+              count: uncategorized.length,
+              net: formatCurrency(sumMilliunits(uncategorized)),
+              note: 'Not counted as income or expenses until categorized.',
+            },
+          }
+        : {}),
       averages: {
         avg_monthly_income: formatCurrency(avgIncome),
         avg_monthly_expenses: formatCurrency(avgExpenses),

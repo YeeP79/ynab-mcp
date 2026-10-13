@@ -18,6 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   an explicit date: the last 30 days by default, and report it in the response
   (`date_filter` / `filters_applied.since_date`, with a note when the default
   was applied).
+- `ynab_income_expense`, `ynab_spending_analysis`, `ynab_spending_by_payee` and
+  `ynab_savings_opportunities` counted every non-transfer outflow as spending
+  (and `ynab_income_expense` every inflow as income): refunds never reduced
+  spending, split transactions were filed under their parent instead of their
+  own categories, and starting balances and uncategorized money were counted.
+  They now use the same rules as `ynab_query` and report uncategorized money
+  separately. `ynab_spending_by_payee` counts a split purchase once.
 - `ynab_transaction_search` reported `date_range.from: "beginning"` while
   searching only the server's default window; it now reports the date used.
 - Transaction list tools dropped the bank's original description

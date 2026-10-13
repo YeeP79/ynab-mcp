@@ -12,6 +12,14 @@ import {
   mockAllTransactions,
 } from '../fixtures/index.js';
 import type { MockClient } from '../fixtures/index.js';
+import {
+  CAT_DINING,
+  CAT_GROCERIES,
+  CAT_RTA,
+  categoriesResponse as ledgerCategories,
+  transactionsResponse as ledgerTransactions,
+  txn,
+} from './ledger-fixtures.js';
 
 describe('handleSavingsOpportunities', () => {
   let mockClient: MockClient;
@@ -119,5 +127,24 @@ describe('handleSavingsOpportunities', () => {
     await handleSavingsOpportunities({ budget_id: 'custom-budget' }, mockClient as never);
 
     expect(mockClient.resolveBudgetId).toHaveBeenCalledWith('custom-budget');
+  });
+
+  it('measures current spend net of refunds, without uncategorized money or starting balances', async () => {
+    const month = new Date().toISOString().slice(0, 7);
+    mockClient.getTransactions.mockResolvedValue(
+      ledgerTransactions([
+        txn(`${month}-01`, -900000, { category: CAT_RTA, payee: 'Starting Balance' }),
+        txn(`${month}-02`, -300000, { category: CAT_DINING }),
+        txn(`${month}-03`, 60000, { category: CAT_DINING, payee: 'Refund' }),
+        txn(`${month}-04`, -90000, { subs: [{ amount: -60000 }, { amount: -30000, category: CAT_GROCERIES }] }),
+        txn(`${month}-05`, -500000, { category: null }),
+      ])
+    );
+    mockClient.getCategories.mockResolvedValue(ledgerCategories());
+
+    const parsed = JSON.parse(await handleSavingsOpportunities({ months: 2 }, mockClient as never));
+
+    // 300 - 60 + 90 = 330, averaged over two months
+    expect(parsed.summary.current_monthly_spend).toBe('$165.00');
   });
 });

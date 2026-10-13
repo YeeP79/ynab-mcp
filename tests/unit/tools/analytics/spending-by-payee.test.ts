@@ -8,6 +8,7 @@ import {
   createMockClient,
   createTransactionsResponse,
   mockAllTransactions,
+  mockCategoryGroups,
 } from '../fixtures/index.js';
 import type { MockClient } from '../fixtures/index.js';
 
@@ -19,9 +20,15 @@ function tx(overrides: {
   category_name?: string | null;
   transfer_account_id?: string | null;
 }) {
+  const categoryName = overrides.category_name ?? 'Cat';
   return {
     payee_id: 'p',
-    category_id: 'c',
+    // Inflows go to Ready to Assign; outflows to the named spending category.
+    category_id: overrides.transfer_account_id
+      ? null
+      : overrides.amount > 0
+        ? 'cat-rta'
+        : `cat-${categoryName}`,
     account_id: 'acct-1',
     payee_name: 'Payee',
     category_name: 'Cat',
@@ -31,11 +38,35 @@ function tx(overrides: {
   };
 }
 
+// The fixture plan's groups, plus Ready to Assign and the categories the
+// tx() helper refers to by name.
+function categoriesResponse() {
+  return {
+    data: {
+      category_groups: [
+        ...mockCategoryGroups,
+        {
+          id: 'grp-internal',
+          name: 'Internal Master Category',
+          categories: [{ id: 'cat-rta', name: 'Inflow: Ready to Assign' }],
+        },
+        {
+          id: 'grp-test',
+          name: 'Test',
+          categories: ['Cat', 'Shopping', 'Groceries'].map((name) => ({ id: `cat-${name}`, name })),
+        },
+      ],
+      server_knowledge: 1,
+    },
+  };
+}
+
 describe('handleSpendingByPayee', () => {
   let mockClient: MockClient;
 
   beforeEach(() => {
     mockClient = createMockClient();
+    mockClient.getCategories.mockResolvedValue(categoriesResponse());
   });
 
   it('ranks payees by total spending', async () => {
@@ -136,5 +167,28 @@ describe('handleSpendingByPayee', () => {
     await handleSpendingByPayee({ budget_id: 'custom-budget' }, mockClient as never);
 
     expect(mockClient.resolveBudgetId).toHaveBeenCalledWith('custom-budget');
+  });
+
+  it('nets refunds and counts a split purchase once', async () => {
+    const txns = [
+      tx({ id: 's1', date: '2024-01-01', amount: -80000, payee_name: 'Target', category_name: 'Groceries' }),
+      // A refund categorized back to Groceries
+      { ...tx({ id: 's2', date: '2024-01-03', amount: 20000, payee_name: 'Target' }), category_id: 'cat-Groceries' },
+      {
+        ...tx({ id: 's3', date: '2024-01-05', amount: -50000, payee_name: 'Target' }),
+        category_id: null,
+        subtransactions: [
+          { id: 's3a', amount: -30000, category_id: 'cat-Groceries', deleted: false },
+          { id: 's3b', amount: -20000, category_id: 'cat-Shopping', deleted: false },
+        ],
+      },
+    ];
+    mockClient.getTransactions.mockResolvedValue(createTransactionsResponse(txns as never));
+
+    const parsed = JSON.parse(await handleSpendingByPayee({}, mockClient as never));
+
+    // 80 - 20 (refund at the same category) + 50 (split) = 110 over 3 purchases
+    expect(parsed.top_payees[0]).toMatchObject({ payee: 'Target', total: '$110.00', transactions: 3 });
+    expect(parsed.summary.transaction_count).toBe(3);
   });
 });

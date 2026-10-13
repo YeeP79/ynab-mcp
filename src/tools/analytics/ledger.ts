@@ -28,6 +28,7 @@ export interface LedgerLine {
   account_id: string;
   account_name: string;
   transfer_account_id: string | null;
+  payee_id: string | null;
   payee_name: string | null;
   category_id: string | null;
   category_name: string | null;
@@ -108,6 +109,7 @@ export function toLedgerLines(
       subs.length > 0
         ? subs.map((sub) => ({
             amount: sub.amount,
+            payee_id: sub.payee_id ?? txn.payee_id ?? null,
             payee_name: sub.payee_name ?? txn.payee_name ?? null,
             category_id: sub.category_id ?? null,
             memo: sub.memo ?? txn.memo ?? null,
@@ -116,6 +118,7 @@ export function toLedgerLines(
         : [
             {
               amount: txn.amount,
+              payee_id: txn.payee_id ?? null,
               payee_name: txn.payee_name ?? null,
               category_id: txn.category_id ?? null,
               memo: txn.memo ?? null,
@@ -129,6 +132,7 @@ export function toLedgerLines(
         amount: part.amount,
         kind: classify(part.payee_name, part.category_id, part.transfer_account_id, categories),
         transfer_account_id: part.transfer_account_id,
+        payee_id: part.payee_id,
         payee_name: part.payee_name,
         category_id: part.category_id,
         category_name: info?.name ?? null,

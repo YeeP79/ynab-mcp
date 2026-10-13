@@ -9,6 +9,7 @@ import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { YnabClient } from '../../services/ynab-client.js';
 import { formatCurrency, sumMilliunits } from '../../utils/milliunits.js';
 import { sanitizeName } from '../../utils/sanitize.js';
+import { buildCategoryIndex, toLedgerLines } from './ledger.js';
 
 // Input schema
 const inputSchema = z.object({
@@ -112,24 +113,31 @@ export async function handleSpendingByPayee(
   sinceDate.setMonth(sinceDate.getMonth() - months);
   const sinceDateStr = sinceDate.toISOString().split('T')[0] ?? '';
 
-  // Get transactions
-  const transactionsResponse = await client.getTransactions(budgetId, {
-    sinceDate: sinceDateStr,
-  });
+  // Get transactions and categories
+  const [transactionsResponse, categoriesResponse] = await Promise.all([
+    client.getTransactions(budgetId, { sinceDate: sinceDateStr }),
+    client.getCategories(budgetId),
+  ]);
 
-  // Filter to outflows only (negative amounts), excluding transfers
-  const transactions = transactionsResponse.data.transactions.filter(
-    (t) => t.amount < 0 && !t.deleted && !t.transfer_account_id
+  // Spending lines from the shared ledger: refunds reduce a payee's total,
+  // split lines keep their own categories, and transfers, starting balances and
+  // uncategorized money are left out.
+  const ledgerLines = toLedgerLines(
+    transactionsResponse.data.transactions,
+    buildCategoryIndex(categoriesResponse.data.category_groups)
   );
+  const transactions = ledgerLines.filter((line) => line.kind === 'spending');
+  const uncategorized = ledgerLines.filter((line) => line.kind === 'uncategorized');
 
-  // Calculate total spending
-  const totalSpending = sumMilliunits(transactions.map((t) => Math.abs(t.amount)));
+  // Calculate total spending (outflows are negative)
+  const totalSpending = sumMilliunits(transactions.map((t) => -t.amount));
 
   // Group by payee
   const byPayee = new Map<
     string,
     {
       amounts: number[];
+      transactionIds: Set<string>;
       categories: string[];
       dates: string[];
     }
@@ -141,13 +149,16 @@ export async function handleSpendingByPayee(
     if (!byPayee.has(payeeName)) {
       byPayee.set(payeeName, {
         amounts: [],
+        transactionIds: new Set(),
         categories: [],
         dates: [],
       });
     }
 
     const payeeData = byPayee.get(payeeName)!;
-    payeeData.amounts.push(Math.abs(txn.amount));
+    payeeData.amounts.push(-txn.amount);
+    // A split transaction is one purchase, however many lines it has.
+    payeeData.transactionIds.add(txn.transaction_id);
     if (txn.category_name) {
       payeeData.categories.push(sanitizeName(txn.category_name));
     }
@@ -158,13 +169,14 @@ export async function handleSpendingByPayee(
   const payeeSpending: PayeeSpending[] = [];
 
   for (const [payeeName, data] of byPayee) {
+    const transactionCount = data.transactionIds.size;
     // Skip if below minimum transactions
-    if (data.amounts.length < minTransactions) {
+    if (transactionCount < minTransactions) {
       continue;
     }
 
     const totalSpent = sumMilliunits(data.amounts);
-    const avgTransaction = totalSpent / data.amounts.length;
+    const avgTransaction = totalSpent / transactionCount;
     const percentOfTotal = totalSpending > 0 ? (totalSpent / totalSpending) * 100 : 0;
 
     // Find most common category
@@ -190,7 +202,7 @@ export async function handleSpendingByPayee(
       payee_name: payeeName,
       total_spent: formatCurrency(totalSpent),
       total_spent_raw: totalSpent,
-      transaction_count: data.amounts.length,
+      transaction_count: transactionCount,
       average_transaction: formatCurrency(avgTransaction),
       percent_of_total: Math.round(percentOfTotal * 10) / 10,
       most_common_category: mostCommonCategory,
@@ -220,7 +232,15 @@ export async function handleSpendingByPayee(
         unique_payees: byPayee.size,
         payees_shown: topPayees.length,
         top_5_concentration: `${Math.round(top5Percent)}%`,
-        transaction_count: transactions.length,
+        transaction_count: new Set(transactions.map((t) => t.transaction_id)).size,
+        ...(uncategorized.length > 0
+          ? {
+              uncategorized_not_counted: {
+                count: uncategorized.length,
+                net: formatCurrency(sumMilliunits(uncategorized.map((l) => l.amount))),
+              },
+            }
+          : {}),
       },
       top_payees: topPayees.map((p) => ({
         payee: p.payee_name,

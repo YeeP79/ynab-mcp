@@ -9,6 +9,7 @@ import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { YnabClient } from '../../services/ynab-client.js';
 import { formatCurrency, sumMilliunits } from '../../utils/milliunits.js';
 import { sanitizeName } from '../../utils/sanitize.js';
+import { buildCategoryIndex, toLedgerLines } from './ledger.js';
 import DecimalJS from 'decimal.js';
 
 const Decimal = DecimalJS.default ?? DecimalJS;
@@ -141,10 +142,13 @@ export async function handleSavingsOpportunities(
     }
   }
 
-  // Filter outflows
-  const transactions = transactionsResponse.data.transactions.filter(
-    (t) => t.amount < 0 && !t.deleted && !t.transfer_account_id
-  );
+  // Spending lines from the shared ledger: refunds reduce spending, split lines
+  // keep their own categories, and transfers, starting balances and
+  // uncategorized money are left out.
+  const transactions = toLedgerLines(
+    transactionsResponse.data.transactions,
+    buildCategoryIndex(categoriesResponse.data.category_groups)
+  ).filter((line) => line.kind === 'spending');
 
   const opportunities: SavingsOpportunity[] = [];
 
@@ -172,17 +176,17 @@ export async function handleSavingsOpportunities(
     }
 
     const catData = byCategory.get(categoryId)!;
-    catData.amounts.push(Math.abs(txn.amount));
+    catData.amounts.push(-txn.amount);
 
     if (!catData.byMonth.has(month)) {
       catData.byMonth.set(month, []);
     }
-    catData.byMonth.get(month)!.push(Math.abs(txn.amount));
+    catData.byMonth.get(month)!.push(-txn.amount);
 
     if (!catData.byPayee.has(payeeId)) {
       catData.byPayee.set(payeeId, []);
     }
-    catData.byPayee.get(payeeId)!.push(Math.abs(txn.amount));
+    catData.byPayee.get(payeeId)!.push(-txn.amount);
   }
 
   // Analyze each category
@@ -321,7 +325,7 @@ export async function handleSavingsOpportunities(
     return sum + o.potential_monthly_savings_milliunits;
   }, 0);
 
-  const totalCurrentSpend = sumMilliunits(transactions.map((t) => Math.abs(t.amount))) / months;
+  const totalCurrentSpend = sumMilliunits(transactions.map((t) => -t.amount)) / months;
 
   const highConfidenceOpportunities = deduped.filter((o) => o.confidence === 'high');
   const highConfidenceSavingsMilliunits = highConfidenceOpportunities.reduce((sum, o) => {

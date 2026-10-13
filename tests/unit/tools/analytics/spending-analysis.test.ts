@@ -12,6 +12,14 @@ import {
   mockCategoryGroups,
 } from '../fixtures/index.js';
 import type { MockClient } from '../fixtures/index.js';
+import {
+  CAT_DINING,
+  CAT_GROCERIES,
+  CAT_RTA,
+  categoriesResponse as ledgerCategories,
+  transactionsResponse as ledgerTransactions,
+  txn,
+} from './ledger-fixtures.js';
 
 describe('handleSpendingAnalysis', () => {
   let mockClient: MockClient;
@@ -188,5 +196,34 @@ describe('handleSpendingAnalysis', () => {
     await handleSpendingAnalysis({ budget_id: customBudgetId }, mockClient as never);
 
     expect(mockClient.resolveBudgetId).toHaveBeenCalledWith(customBudgetId);
+  });
+
+  it('nets refunds, splits by category, and leaves out uncategorized money and starting balances', async () => {
+    const month = new Date().toISOString().slice(0, 7);
+    mockClient.getTransactions.mockResolvedValue(
+      ledgerTransactions([
+        txn(`${month}-01`, -500000, { category: CAT_RTA, payee: 'Starting Balance' }),
+        txn(`${month}-02`, -300000, { category: CAT_GROCERIES }),
+        txn(`${month}-03`, 50000, { category: CAT_GROCERIES, payee: 'Refund' }),
+        txn(`${month}-04`, -100000, {
+          subs: [{ amount: -60000 }, { amount: -40000, category: CAT_DINING }],
+        }),
+        txn(`${month}-05`, -70000, { category: null }),
+      ])
+    );
+    mockClient.getCategories.mockResolvedValue(ledgerCategories());
+
+    const parsed = JSON.parse(await handleSpendingAnalysis({}, mockClient as never));
+    const byName = Object.fromEntries(
+      parsed.spending_by_category.map((c: { category_name: string; total_spent: string }) => [
+        c.category_name,
+        c.total_spent,
+      ])
+    );
+
+    // Groceries: 300 - 50 + 60 = 310; Eating Out: 40 (from the split).
+    expect(byName).toEqual({ Groceries: '$310.00', 'Eating Out': '$40.00' });
+    expect(parsed.summary.total_spent).toBe('$350.00');
+    expect(parsed.summary.uncategorized_not_counted).toEqual({ count: 1, net: '-$70.00' });
   });
 });

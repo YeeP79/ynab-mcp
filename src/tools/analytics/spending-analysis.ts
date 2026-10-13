@@ -9,6 +9,7 @@ import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { YnabClient } from '../../services/ynab-client.js';
 import { formatCurrency, sumMilliunits } from '../../utils/milliunits.js';
 import { sanitizeName } from '../../utils/sanitize.js';
+import { buildCategoryIndex, toLedgerLines } from './ledger.js';
 
 // Input schema
 const inputSchema = z.object({
@@ -111,10 +112,15 @@ export async function handleSpendingAnalysis(
     }
   }
 
-  // Filter to outflows only (negative amounts)
-  let transactions = transactionsResponse.data.transactions.filter(
-    (t) => t.amount < 0 && !t.deleted && !t.transfer_account_id
+  // Spending lines from the shared ledger: split lines counted separately,
+  // refunds included (they reduce spending), transfers, starting balances and
+  // uncategorized money left out.
+  const ledgerLines = toLedgerLines(
+    transactionsResponse.data.transactions,
+    buildCategoryIndex(categoriesResponse.data.category_groups)
   );
+  let transactions = ledgerLines.filter((line) => line.kind === 'spending');
+  const uncategorized = ledgerLines.filter((line) => line.kind === 'uncategorized');
 
   // Filter by category if specified
   if (validated.category_id) {
@@ -139,16 +145,16 @@ export async function handleSpendingAnalysis(
     }
 
     const catData = byCategoryRaw.get(categoryId)!;
-    catData.amounts.push(Math.abs(txn.amount));
+    catData.amounts.push(-txn.amount);
 
     if (!catData.byMonth.has(month)) {
       catData.byMonth.set(month, []);
     }
-    catData.byMonth.get(month)!.push(Math.abs(txn.amount));
+    catData.byMonth.get(month)!.push(-txn.amount);
   }
 
   // Calculate total spending
-  const totalSpending = sumMilliunits(transactions.map((t) => Math.abs(t.amount)));
+  const totalSpending = sumMilliunits(transactions.map((t) => -t.amount));
 
   // Build category analysis
   const categorySpending: CategorySpending[] = [];
@@ -196,7 +202,7 @@ export async function handleSpendingAnalysis(
     }
 
     const monthData = byMonth.get(month)!;
-    monthData.set(categoryId, (monthData.get(categoryId) ?? 0) + Math.abs(txn.amount));
+    monthData.set(categoryId, (monthData.get(categoryId) ?? 0) + -txn.amount);
   }
 
   // Build monthly spending data
@@ -247,6 +253,14 @@ export async function handleSpendingAnalysis(
         category_count: categorySpending.length,
         analysis_period: `${months} months`,
         since_date: sinceDateStr,
+        ...(uncategorized.length > 0
+          ? {
+              uncategorized_not_counted: {
+                count: uncategorized.length,
+                net: formatCurrency(sumMilliunits(uncategorized.map((l) => l.amount))),
+              },
+            }
+          : {}),
       },
       insights: {
         top_5_categories: topCategories.map((c) => ({
