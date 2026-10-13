@@ -62,3 +62,7 @@ PLAN.md
 *.bak
 *.tmp
 *.temp
+
+# Built MCP bundle output
+mcpb/server/
+*.mcpb

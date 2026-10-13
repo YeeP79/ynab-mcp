@@ -21,7 +21,8 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "build:mcpb": "tsc -p mcpb/tsconfig.json && esbuild mcpb/src/bridge.ts --bundle --platform=node --format=esm --target=node18 --outfile=mcpb/server/index.mjs && npx --yes @anthropic-ai/mcpb@2.1.2 pack mcpb ynab-mcp-remote.mcpb"
   },
   "keywords": [
     "mcp",
@@ -60,6 +61,7 @@
     "@types/pg": "^8.11.10",
     "@types/supertest": "^7.2.0",
     "@vitest/coverage-v8": "^1.2.0",
+    "esbuild": "^0.27.2",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.2.0",

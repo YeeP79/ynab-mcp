@@ -1,0 +1,44 @@
+{
+  "manifest_version": "0.3",
+  "name": "ynab-mcp-remote",
+  "display_name": "YNAB (remote server)",
+  "version": "0.3.3",
+  "description": "Connect Claude Desktop to a ynab-mcp server running in HTTP mode elsewhere, such as another machine on your network.",
+  "long_description": "A small bridge that relays Claude Desktop's MCP traffic to a ynab-mcp server started with MCP_TRANSPORT=http and MCP_API_KEYS. The YNAB access token stays on the server; this machine only holds a revocable client key. Runs on Claude Desktop's built-in Node.js, so nothing else needs to be installed.",
+  "author": { "name": "ynab-mcp contributors", "url": "https://github.com/auzroz/ynab-mcp" },
+  "repository": { "type": "git", "url": "https://github.com/auzroz/ynab-mcp.git" },
+  "homepage": "https://github.com/auzroz/ynab-mcp",
+  "license": "MIT",
+  "keywords": ["ynab", "budget", "finance", "remote"],
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.mjs",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/index.mjs"],
+      "env": {
+        "YNAB_MCP_URL": "${user_config.server_url}",
+        "YNAB_MCP_API_KEY": "${user_config.api_key}"
+      }
+    }
+  },
+  "user_config": {
+    "server_url": {
+      "type": "string",
+      "title": "Server URL",
+      "description": "The ynab-mcp server endpoint, for example http://192.168.1.20:3000/mcp",
+      "required": true
+    },
+    "api_key": {
+      "type": "string",
+      "title": "API key",
+      "description": "This machine's key from the server's MCP_API_KEYS (the part after \"name:\")",
+      "required": true,
+      "sensitive": true
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": { "node": ">=18.0.0" }
+  }
+}
