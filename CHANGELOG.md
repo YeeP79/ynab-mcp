@@ -34,6 +34,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   returns `null` instead of `"Unknown"` for these fields on transactions that
   weren't imported.
 
+### Changed
+
+- **Tool definitions are about 30% smaller** (roughly 14.8k to 10.4k tokens per
+  conversation). Example-question lists moved out of the 66 tool descriptions
+  (the server instructions now route questions), write notes were shortened,
+  and the identical `budget_id` description was dropped from every schema (the
+  instructions say to omit it). A test keeps the definitions under budget.
+
 ### Security
 
 - **HTTP header mode no longer serves the server-held token to the whole

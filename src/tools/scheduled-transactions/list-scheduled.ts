@@ -15,7 +15,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
 });
 
 // Tool definition
@@ -23,20 +23,11 @@ export const listScheduledTransactionsTool: Tool = {
   name: 'ynab_list_scheduled_transactions',
   description: `List all scheduled transactions (recurring bills, subscriptions, etc.) in a budget.
 
-Use when the user asks:
-- "Show my scheduled transactions"
-- "What recurring bills do I have?"
-- "List my subscriptions"
-- "What payments are coming up?"
-
 Returns scheduled transaction details including frequency, next occurrence, and amounts.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
     },
   },
 };

@@ -16,7 +16,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   query: z
     .string()
     .max(500)
@@ -62,22 +62,11 @@ export const transactionSearchTool: Tool = {
   name: 'ynab_transaction_search',
   description: `Search transactions with powerful filtering options.
 
-Use when the user asks:
-- "Find transactions at [store]"
-- "Search for [keyword] in my transactions"
-- "Transactions over $100"
-- "What did I spend on [category]?"
-- "Find large purchases"
-- "Search my expenses"
-
 Supports filtering by payee, category, amount range, date range, and text search.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       query: {
         type: 'string',
         maxLength: 500,

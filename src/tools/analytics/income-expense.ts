@@ -15,7 +15,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   months: z
     .number()
     .int()
@@ -30,23 +30,13 @@ export const incomeExpenseTool: Tool = {
   name: 'ynab_income_expense',
   description: `Track income vs expenses with monthly breakdown.
 
-Use when the user asks:
-- "How much did I earn vs spend?"
-- "What's my income vs expenses?"
-- "Am I spending more than I make?"
-- "Show my cash flow"
-- "What's my savings rate?"
-
 Returns monthly income, expenses, net savings, and savings rate. Income is money
 assigned to Ready to Assign; expenses are net of refunds. Transfers, starting
 balances and uncategorized transactions are excluded (uncategorized is reported).`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       months: {
         type: 'integer',
         description: 'Number of months to analyze (default 6)',

@@ -14,7 +14,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   payee_id: z.string().uuid('Invalid payee UUID format').describe('The payee UUID'),
 });
 
@@ -23,19 +23,11 @@ export const listPayeeLocationsByPayeeTool: Tool = {
   name: 'ynab_list_payee_locations_by_payee',
   description: `List all locations for a specific payee.
 
-Use when the user asks:
-- "Where is [payee] located?"
-- "Show locations for [store]"
-- "Which [payee] locations have I visited?"
-
 Returns all recorded locations for a specific payee.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       payee_id: {
         type: 'string',
         description: 'The payee UUID',

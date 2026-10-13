@@ -13,7 +13,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   include_ids: z
     .boolean()
     .optional()
@@ -26,13 +26,6 @@ export const importTransactionsTool: Tool = {
   name: 'ynab_import_transactions',
   description: `Trigger import of transactions from linked bank accounts.
 
-Use when the user asks:
-- "Import my bank transactions"
-- "Sync my accounts"
-- "Get latest transactions from my bank"
-- "Refresh bank connections"
-- "Pull in new transactions"
-
 Initiates a file-based import for accounts that have direct import enabled.
 Returns the count of transactions that were imported.
 
@@ -40,10 +33,7 @@ Note: This is a WRITE operation that requires write mode to be enabled.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       include_ids: {
         type: 'boolean',
         description: 'Include imported transaction IDs in the response',

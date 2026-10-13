@@ -15,7 +15,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   scheduled_transaction_id: z
     .string()
     .uuid()
@@ -27,21 +27,12 @@ export const deleteScheduledTransactionTool: Tool = {
   name: 'ynab_delete_scheduled_transaction',
   description: `Delete a scheduled transaction from a budget.
 
-Use when the user asks:
-- "Delete that scheduled transaction"
-- "Remove the recurring payment"
-- "Cancel that subscription"
-- "Stop the scheduled bill"
-
-Requires READ_ONLY mode to be disabled (YNAB_READ_ONLY=false).
+Write operation (requires YNAB_READ_ONLY=false).
 This action cannot be undone.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       scheduled_transaction_id: {
         type: 'string',
         description: 'The scheduled transaction UUID to delete',

@@ -28,21 +28,12 @@ export const getMonthCategoryTool: Tool = {
   name: 'ynab_get_month_category',
   description: `Get category details for a specific month, including that month's budgeted amount, activity, and balance.
 
-Use when the user asks:
-- "How much did I budget for Groceries in January?"
-- "What was my spending in [category] last month?"
-- "Show me [category] for [month]"
-- "What was my [category] balance in [month]?"
-
 Use first-of-month format for the month parameter (e.g., 2024-01-01 for January 2024).
 Requires a category_id. Use ynab_list_categories first to find the category ID.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID or "last-used". Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       month: {
         type: 'string',
         pattern: '^\\d{4}-\\d{2}-01$',

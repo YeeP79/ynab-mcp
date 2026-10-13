@@ -20,7 +20,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   include_closed: z
     .boolean()
     .optional()
@@ -32,21 +32,11 @@ export const listAccountsTool: Tool = {
   name: 'ynab_list_accounts',
   description: `List all accounts in a budget with their current balances.
 
-Use when the user asks:
-- "What accounts do I have?"
-- "Show my account balances"
-- "What's my net worth?"
-- "List my bank accounts"
-- "How much money do I have?"
-
 Returns account names, types, and current/cleared/uncleared balances.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       include_closed: {
         type: 'boolean',
         description: 'Whether to include closed accounts',

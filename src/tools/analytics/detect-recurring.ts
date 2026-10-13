@@ -20,7 +20,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   months: z
     .number()
     .int()
@@ -42,20 +42,11 @@ export const detectRecurringTool: Tool = {
   name: 'ynab_detect_recurring',
   description: `Detect recurring transactions (subscriptions, bills) by analyzing transaction patterns.
 
-Use when the user asks:
-- "What subscriptions do I have?"
-- "Find my recurring bills"
-- "What do I pay every month?"
-- "Detect my regular payments"
-
 Analyzes transaction history to find patterns and estimates monthly costs.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       months: {
         type: 'number',
         description: 'Number of months to analyze (default 6)',

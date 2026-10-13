@@ -14,7 +14,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   name: z.string().min(1).max(500).describe('The name of the new category group'),
 });
 
@@ -23,21 +23,14 @@ export const createCategoryGroupTool: Tool = {
   name: 'ynab_create_category_group',
   description: `Create a new category group.
 
-Use when the user asks:
-- "Add a new category group called X"
-- "Create a top-level budgeting section for Y"
-
 Category groups organize related categories (e.g., "Monthly Bills", "Fun Money").
 After creating a group, use ynab_create_category to add categories to it.
 
-**Note:** This is a write operation. Requires YNAB_READ_ONLY=false.`,
+Write operation (requires YNAB_READ_ONLY=false).`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       name: {
         type: 'string',
         description: 'The name of the new category group',

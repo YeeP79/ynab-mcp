@@ -15,7 +15,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
 });
 
 // Tool definition
@@ -23,20 +23,11 @@ export const getBudgetTool: Tool = {
   name: 'ynab_get_budget',
   description: `Get detailed information about a specific budget including accounts, categories, and payees.
 
-Use when the user asks:
-- "Show me my budget details"
-- "What's in my budget?"
-- "Give me an overview of my budget"
-- "Tell me about my main budget"
-
 Returns comprehensive budget data including all accounts, category groups, categories, and payees.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
     },
   },
 };

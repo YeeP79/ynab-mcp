@@ -28,7 +28,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   name: z.string().min(1).max(100).describe('The name of the account'),
   type: z
     .nativeEnum(ynab.SaveAccountType)
@@ -44,22 +44,13 @@ export const createAccountTool: Tool = {
   name: 'ynab_create_account',
   description: `Create a new account in a budget.
 
-Use when the user asks:
-- "Add a new checking account"
-- "Create a savings account"
-- "I want to add my credit card to YNAB"
-- "Set up a new account with balance X"
-
 Account types (only these can be created via the YNAB API): checking, savings, cash, creditCard, otherAsset, otherLiability
 
 Balance should be provided in dollars (e.g., 1000.50). For credit cards and liability accounts, use a negative balance for amounts owed.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       name: {
         type: 'string',
         description: 'The name of the account',

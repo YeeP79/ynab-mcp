@@ -16,7 +16,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   months: z
     .number()
     .int()
@@ -44,21 +44,11 @@ export const spendingByPayeeTool: Tool = {
   name: 'ynab_spending_by_payee',
   description: `Analyze spending patterns by merchant/payee.
 
-Use when the user asks:
-- "Where do I spend the most?"
-- "Top merchants by spending"
-- "Which stores do I shop at most?"
-- "Show spending by payee"
-- "Who gets most of my money?"
-
 Returns top payees ranked by total spending with transaction counts and averages.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       months: {
         type: 'integer',
         description: 'Number of months to analyze (1-12, default 3)',

@@ -28,21 +28,11 @@ export const goalProgressTool: Tool = {
   name: 'ynab_goal_progress',
   description: `Track progress on all category goals.
 
-Use when the user asks:
-- "How are my goals doing?"
-- "Show goal progress"
-- "Which goals need more funding?"
-- "Am I on track with my savings goals?"
-- "What goals are behind?"
-
 Returns goal progress, funding status, and projections for each category with a goal.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID or "last-used". Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       filter: {
         type: 'string',
         enum: ['all', 'on_track', 'behind', 'underfunded', 'complete'],

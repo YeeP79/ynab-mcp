@@ -19,7 +19,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   months: z
     .number()
     .int()
@@ -34,21 +34,11 @@ export const savingsOpportunitiesTool: Tool = {
   name: 'ynab_savings_opportunities',
   description: `Find potential savings opportunities based on spending patterns.
 
-Use when the user asks:
-- "How can I save money?"
-- "Where can I cut back?"
-- "What are my unnecessary expenses?"
-- "Help me reduce spending"
-- "Find savings opportunities"
-
 Analyzes spending to identify areas where cuts might be possible.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       months: {
         type: 'number',
         description: 'Number of months to analyze (2-12, default 3)',

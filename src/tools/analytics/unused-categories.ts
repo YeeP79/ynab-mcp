@@ -15,7 +15,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   months: z
     .number()
     .int()
@@ -34,21 +34,11 @@ export const unusedCategoriesTool: Tool = {
   name: 'ynab_unused_categories',
   description: `Find categories with no recent activity.
 
-Use when the user asks:
-- "Which categories am I not using?"
-- "Find unused categories"
-- "Clean up my budget categories"
-- "Categories with no activity"
-- "What categories can I delete?"
-
 Helps identify categories that could be removed or consolidated.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       months: {
         type: 'number',
         description: 'Number of months to check for activity (default 6)',

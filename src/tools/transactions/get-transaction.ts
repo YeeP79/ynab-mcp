@@ -15,7 +15,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   transaction_id: z.string().uuid().describe('The transaction UUID to retrieve'),
 });
 
@@ -24,19 +24,11 @@ export const getTransactionTool: Tool = {
   name: 'ynab_get_transaction',
   description: `Get details about a specific transaction.
 
-Use when the user asks:
-- "Show me details for that transaction"
-- "What's the info on transaction [id]?"
-- "Tell me more about that purchase"
-
 Requires a transaction_id. Use ynab_list_transactions first to find the transaction ID.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       transaction_id: {
         type: 'string',
         description: 'The transaction UUID to retrieve',

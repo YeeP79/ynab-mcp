@@ -14,7 +14,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   category_group_id: z.string().uuid().describe('The category group UUID to update'),
   name: z.string().min(1).max(500).describe('The new name for the category group'),
 });
@@ -24,20 +24,13 @@ export const updateCategoryGroupTool: Tool = {
   name: 'ynab_update_category_group',
   description: `Rename an existing category group.
 
-Use when the user asks:
-- "Rename the [group] category group"
-- "Change the name of my budgeting section"
-
 Requires a category_group_id. Use ynab_list_categories first to find the group ID.
 
-**Note:** This is a write operation. Requires YNAB_READ_ONLY=false.`,
+Write operation (requires YNAB_READ_ONLY=false).`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       category_group_id: {
         type: 'string',
         description: 'The category group UUID to update',

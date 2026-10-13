@@ -16,7 +16,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   filter: z
     .enum(['all', 'funded', 'unfunded', 'negative', 'positive'])
     .optional()
@@ -36,21 +36,11 @@ export const categoryBalancesTool: Tool = {
   name: 'ynab_category_balances',
   description: `Check category balances with optional filtering.
 
-Use when the user asks:
-- "What's my balance in [category]?"
-- "How much do I have for groceries?"
-- "Show category balances"
-- "Which categories have money?"
-- "What categories are negative?"
-
 Returns current category balances with filtering options.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       filter: {
         type: 'string',
         enum: ['all', 'funded', 'unfunded', 'negative', 'positive'],

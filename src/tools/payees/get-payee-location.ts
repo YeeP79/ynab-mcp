@@ -14,7 +14,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   payee_location_id: z.string().uuid().describe('The payee location UUID'),
 });
 
@@ -27,10 +27,7 @@ Returns the details of a single payee location including coordinates.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       payee_location_id: {
         type: 'string',
         description: 'The payee location UUID',

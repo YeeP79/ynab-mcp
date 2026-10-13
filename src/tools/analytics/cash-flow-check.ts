@@ -29,7 +29,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   since_date: z.string().optional().describe('Start date (default: 12 months ago)'),
   until_date: z.string().optional().describe('End date, inclusive (default: today)'),
 });
@@ -38,12 +38,6 @@ const inputSchema = z.object({
 export const cashFlowCheckTool: Tool = {
   name: 'ynab_cash_flow_check',
   description: `Check income against spending month by month, tied to the real change in account balances.
-
-Use when the user asks:
-- "Are we spending more than we make?"
-- "Where did our savings go this year?"
-- "Did our accounts grow or shrink, and why?"
-- "Are bonuses covering our regular spending?"
 
 For each month: income, spending (net of refunds), uncategorized money, transfers
 to off-budget accounts, and the change in total on-budget balances. These always
@@ -55,10 +49,7 @@ Amounts are in dollars. Default period: the last 12 full months plus this month.
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       since_date: {
         type: 'string',
         description:

@@ -40,7 +40,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   transactions: z
     .array(transactionUpdateSchema)
     .min(1)
@@ -53,22 +53,14 @@ export const updateTransactionsTool: Tool = {
   name: 'ynab_update_transactions',
   description: `Update multiple existing transactions in a single request (up to 100).
 
-Use when the user asks:
-- "Recategorize all these transactions"
-- "Mark these transactions as cleared"
-- "Approve all imported transactions"
-
 Each entry must include the transaction id. Use ynab_list_transactions first to find ids.
 Amounts are in dollars (e.g., -42.50 for a $42.50 outflow).
 
-**Note:** This is a write operation. Requires YNAB_READ_ONLY=false.`,
+Write operation (requires YNAB_READ_ONLY=false).`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       transactions: {
         type: 'array',
         description: 'Array of transactions to update (1-100). Each must include the transaction id.',

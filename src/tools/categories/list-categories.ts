@@ -15,7 +15,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   include_hidden: z
     .boolean()
     .optional()
@@ -27,21 +27,11 @@ export const listCategoriesTool: Tool = {
   name: 'ynab_list_categories',
   description: `List all category groups and categories in a budget with budgeted amounts and balances.
 
-Use when the user asks:
-- "What categories do I have?"
-- "Show my budget categories"
-- "How is my budget organized?"
-- "What are my spending categories?"
-- "List my budget breakdown"
-
 Returns category groups with their categories, including budgeted amounts, activity, and remaining balances.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       include_hidden: {
         type: 'boolean',
         description: 'Whether to include hidden categories',

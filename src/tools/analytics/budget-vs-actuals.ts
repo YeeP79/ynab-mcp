@@ -16,7 +16,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   month: z
     .string()
     .regex(/^\d{4}-(0[1-9]|1[0-2])-01$/, 'Month must be first-of-month format (YYYY-MM-01) with valid month (01-12)')
@@ -33,21 +33,11 @@ export const budgetVsActualsTool: Tool = {
   name: 'ynab_budget_vs_actuals',
   description: `Compare budgeted amounts against actual spending for each category.
 
-Use when the user asks:
-- "How am I doing on my budget?"
-- "Am I over budget anywhere?"
-- "Compare budget vs actual"
-- "Which categories are overspent?"
-- "Show my budget performance"
-
 Returns detailed budget vs actuals for all categories with variance analysis.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       month: {
         type: 'string',
         pattern: '^\\d{4}-(0[1-9]|1[0-2])-01$',

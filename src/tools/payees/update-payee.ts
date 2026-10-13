@@ -14,7 +14,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   payee_id: z.string().uuid().describe('The payee UUID to update'),
   name: z.string().min(1).max(500).describe('The new name for the payee'),
 });
@@ -24,21 +24,13 @@ export const updatePayeeTool: Tool = {
   name: 'ynab_update_payee',
   description: `Rename an existing payee.
 
-Use when the user asks:
-- "Rename payee X to Y"
-- "Fix the name of this payee"
-- "Clean up this merchant name"
-
 Requires a payee_id. Use ynab_list_payees first to find the payee ID.
 
-**Note:** This is a write operation. Requires YNAB_READ_ONLY=false.`,
+Write operation (requires YNAB_READ_ONLY=false).`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       payee_id: {
         type: 'string',
         description: 'The payee UUID to update',

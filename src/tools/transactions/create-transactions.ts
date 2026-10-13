@@ -36,7 +36,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   transactions: z
     .array(transactionSchema)
     .min(1)
@@ -49,21 +49,13 @@ export const createTransactionsTool: Tool = {
   name: 'ynab_create_transactions',
   description: `Create multiple transactions in a single request (bulk import).
 
-Use when the user asks:
-- "Import these transactions"
-- "Add multiple transactions"
-- "Bulk create transactions"
-
-Requires READ_ONLY mode to be disabled (YNAB_READ_ONLY=false).
+Write operation (requires YNAB_READ_ONLY=false).
 Maximum 100 transactions per request.
 Use import_id to prevent duplicate imports.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       transactions: {
         type: 'array',
         description: 'Array of transactions to create',

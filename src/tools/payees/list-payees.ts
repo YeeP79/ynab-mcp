@@ -14,7 +14,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
 });
 
 // Tool definition
@@ -22,20 +22,11 @@ export const listPayeesTool: Tool = {
   name: 'ynab_list_payees',
   description: `List all payees in a budget.
 
-Use when the user asks:
-- "Show my payees"
-- "List all merchants"
-- "Who have I paid?"
-- "Find a payee"
-
 Returns payee names and IDs. Payees are merchants, people, or places you transact with.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
     },
   },
 };

@@ -16,7 +16,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
 });
 
 // Tool definition
@@ -24,19 +24,11 @@ export const listMoneyMovementsTool: Tool = {
   name: 'ynab_list_money_movements',
   description: `List money movements (moves of funds between categories) for a budget.
 
-Use when the user asks:
-- "Show me my money moves between categories"
-- "When did I move money out of [category]?"
-- "List my category fund transfers"
-
 Returns each movement's amount, the categories it moved between, and when it happened.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
     },
   },
 };

@@ -16,7 +16,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"'),
+    .describe('Plan ID; defaults to the configured plan'),
   months: z
     .number()
     .int()
@@ -32,21 +32,11 @@ export const spendingAnalysisTool: Tool = {
   name: 'ynab_spending_analysis',
   description: `Analyze spending patterns and trends.
 
-Use when the user asks:
-- "How much am I spending?"
-- "What are my biggest expenses?"
-- "Show my spending trends"
-- "Analyze my spending habits"
-- "Where does my money go?"
-
 Provides category breakdowns, trends, and insights.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: {
-        type: 'string',
-        description: 'Budget UUID. Defaults to YNAB_BUDGET_ID env var or "last-used"',
-      },
+      budget_id: { type: 'string' },
       months: {
         type: 'number',
         description: 'Number of months to analyze (default 3)',
