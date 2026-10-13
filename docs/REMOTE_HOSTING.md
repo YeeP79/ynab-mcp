@@ -101,7 +101,7 @@ volumes: { ynab-data: {} }
 
 ## Prompts
 
-The server also exposes 7 MCP Prompts — guided, YNAB-methodology-grounded
+The server also exposes 8 MCP Prompts — guided, YNAB-methodology-grounded
 workflows that orchestrate several tools into a single review. Available in
 any MCP client that supports the `prompts` capability:
 
@@ -114,6 +114,7 @@ any MCP client that supports the `prompts` capability:
 | `ynab-overspending-triage` | Roll With the Punches — finds overspending and suggests moves to fix it |
 | `ynab-age-of-money` | Age Your Money — checks cash cushion, credit card float, near-term cash flow |
 | `ynab-reconcile-cleanup` | Weekly hygiene: uncleared transactions and unused/sprawling categories |
+| `ynab-spending-report` | Household spending report for a period: income vs spending tied to balances, where the money goes, talking points |
 
 ## Security notes
 

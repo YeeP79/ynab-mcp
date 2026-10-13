@@ -24,6 +24,8 @@ export { overspendingAlertsTool, handleOverspendingAlerts } from './overspending
 export { transactionSearchTool, handleTransactionSearch } from './transaction-search.js';
 export { spendingPaceTool, handleSpendingPace } from './spending-pace.js';
 export { categoryBalancesTool, handleCategoryBalances } from './category-balances.js';
+export { queryTool, handleQuery } from './query.js';
+export { cashFlowCheckTool, handleCashFlowCheck } from './cash-flow-check.js';
 export { creditCardStatusTool, handleCreditCardStatus } from './credit-card-status.js';
 export { ageOfMoneyTool, handleAgeOfMoney } from './age-of-money.js';
 export {

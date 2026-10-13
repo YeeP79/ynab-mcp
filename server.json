@@ -90,6 +90,8 @@
     "ynab_transaction_search",
     "ynab_spending_pace",
     "ynab_category_balances",
+    "ynab_query",
+    "ynab_cash_flow_check",
     "ynab_credit_card_status",
     "ynab_age_of_money",
     "ynab_preview_scheduled_transaction",

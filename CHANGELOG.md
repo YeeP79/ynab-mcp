@@ -49,6 +49,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ynab_update_category_details`: rename a category, move it to another group,
   edit its note, or set or remove its target (amount, date, and "set aside" vs
   "refill up to"). `ynab_create_category` accepts the same target fields.
+- `ynab_query`: group and total spending, income, transfers or uncategorized
+  money by month, year, category, category group, payee, account or memo tag,
+  with filters (categories, groups, payees including bank descriptions,
+  accounts, tags, text, amount range). Split transactions count per line,
+  transfers and starting balances are excluded, and spending is net of refunds;
+  the response reports what was left out.
+- `ynab_cash_flow_check`: monthly income vs spending tied to the actual change
+  in on-budget balances (opening, closing, and a breakdown that always adds up),
+  plus the largest inflows and income by payee.
+- `ynab-spending-report` prompt: a household report built on the two tools above.
 - `since_date: "all"` (or `"all time"`) on the transaction tools above returns
   full history.
 

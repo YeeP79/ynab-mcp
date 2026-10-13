@@ -16,13 +16,13 @@ Traditional YNAB integrations require manual API calls or custom scripting. This
 - **Talk to your budget naturally** — Ask Claude "Am I overspending on dining out?" and get instant insights
 - **Get AI-powered financial analysis** — Subscription detection, spending trends, savings recommendations, and budget health scores
 - **Stay safe by default** — Read-only mode protects against accidental changes
-- **Access everything** — 67 tools total: comprehensive YNAB API coverage (41 tools), 23 custom analytics tools, and 3 system tools
+- **Access everything** — 69 tools total: comprehensive YNAB API coverage (41 tools), 25 custom analytics tools, and 3 system tools
 
 ## Features
 
 | Feature | Description |
 |---------|-------------|
-| **Broad API Coverage** | 67 MCP tools spanning the YNAB API endpoints |
+| **Broad API Coverage** | 69 MCP tools spanning the YNAB API endpoints |
 | **Advanced Analytics** | 23 tools for spending analysis, trend detection, and financial insights |
 | **Read-Only by Default** | Write operations require explicit opt-in (`YNAB_READ_ONLY=false`) |
 | **Smart Rate Limiting** | Token bucket algorithm with 180 req/hour budget (10% safety margin) |
@@ -209,9 +209,9 @@ Once connected, try asking Claude:
 | "Am I on track this month?" | `ynab_spending_pace` |
 | "Compare this month to last month" | `ynab_monthly_comparison` |
 
-## Available Tools (67 Total)
+## Available Tools (69 Total)
 
-### Analytics Tools (23)
+### Analytics Tools (25)
 
 These tools provide AI-powered financial insights beyond basic YNAB functionality:
 
@@ -224,6 +224,8 @@ These tools provide AI-powered financial insights beyond basic YNAB functionalit
 | `ynab_budget_vs_actuals` | Compare budgeted vs actual spending |
 | `ynab_quick_summary` | At-a-glance budget status overview |
 | `ynab_income_expense` | Income vs expense breakdown and trends |
+| `ynab_query` | Group and total spending or income by month, category, group, payee, account or memo tag, with filters |
+| `ynab_cash_flow_check` | Monthly income vs spending tied to the actual change in account balances; largest inflows |
 | `ynab_net_worth` | Calculate total net worth from all accounts |
 | `ynab_goal_progress` | Track goal funding progress with projections |
 | `ynab_spending_by_payee` | Analyze spending by merchant/payee |
@@ -341,7 +343,7 @@ Coverage of the YNAB API endpoints:
 
 ## Available Prompts
 
-Beyond raw tool access, the server exposes 7 MCP Prompts — guided workflows
+Beyond raw tool access, the server exposes 8 MCP Prompts — guided workflows
 grounded in YNAB's own budgeting methodology (the Four Rules, Age of Money,
 True Expenses) that orchestrate several tools into a single review. Any MCP
 client that supports the `prompts` capability can invoke them directly.
@@ -355,6 +357,7 @@ client that supports the `prompts` capability can invoke them directly.
 | `ynab-overspending-triage` | Roll With the Punches — find and fix overspending |
 | `ynab-age-of-money` | Age Your Money — check cash cushion and credit card float |
 | `ynab-reconcile-cleanup` | Weekly hygiene: reconciliation and category cleanup |
+| `ynab-spending-report` | Household spending report for a period: income vs spending, where the money goes, talking points |
 
 See [docs/REMOTE_HOSTING.md](docs/REMOTE_HOSTING.md#prompts) for details.
 

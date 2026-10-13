@@ -15,6 +15,7 @@ import { trueExpensesPrompt, buildTrueExpensesMessages } from './true-expenses.j
 import { overspendingTriagePrompt, buildOverspendingTriageMessages } from './overspending-triage.js';
 import { ageOfMoneyPrompt, buildAgeOfMoneyMessages } from './age-of-money.js';
 import { reconcileCleanupPrompt, buildReconcileCleanupMessages } from './reconcile-cleanup.js';
+import { spendingReportPrompt, buildSpendingReportMessages } from './spending-report.js';
 
 export const prompts: Prompt[] = [
   pulseCheckPrompt,
@@ -24,6 +25,7 @@ export const prompts: Prompt[] = [
   overspendingTriagePrompt,
   ageOfMoneyPrompt,
   reconcileCleanupPrompt,
+  spendingReportPrompt,
 ];
 
 type PromptMessageBuilder = (args: Record<string, string>) => GetPromptResult;
@@ -36,6 +38,7 @@ const builders: Record<string, PromptMessageBuilder> = {
   'ynab-overspending-triage': () => buildOverspendingTriageMessages(),
   'ynab-age-of-money': () => buildAgeOfMoneyMessages(),
   'ynab-reconcile-cleanup': () => buildReconcileCleanupMessages(),
+  'ynab-spending-report': (args) => buildSpendingReportMessages(args),
 };
 
 /** Truncate and strip newlines from an untrusted prompt name before it's echoed back (e.g. in an error message). */
