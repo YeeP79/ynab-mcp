@@ -15,7 +15,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   months: z
     .number()
     .int()
@@ -30,11 +30,21 @@ export const budgetSuggestionsTool: Tool = {
   name: 'ynab_budget_suggestions',
   description: `Suggest budget amounts based on historical spending.
 
+Use when the user asks:
+- "How much should I budget for [category]?"
+- "Suggest budget amounts"
+- "What's a realistic budget?"
+- "Help me set my budget"
+- "Based on my spending, what should I budget?"
+
 Returns suggested monthly budget amounts for each category based on actual spending patterns.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       months: {
         type: 'integer',
         minimum: 1,

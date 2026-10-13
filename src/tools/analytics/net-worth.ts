@@ -15,7 +15,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   include_closed: z
     .boolean()
     .optional()
@@ -27,12 +27,21 @@ export const netWorthTool: Tool = {
   name: 'ynab_net_worth',
   description: `Calculate total net worth from all accounts.
 
+Use when the user asks:
+- "What's my net worth?"
+- "How much do I have in total?"
+- "Show all my account balances"
+- "What are my assets and liabilities?"
+
 Includes both budget accounts and tracking accounts (investments, property, etc.).
 Returns breakdown by account type with total assets, liabilities, and net worth.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       include_closed: {
         type: 'boolean',
         description: 'Include closed accounts in calculation (default false)',

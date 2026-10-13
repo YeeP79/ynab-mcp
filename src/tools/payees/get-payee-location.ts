@@ -14,7 +14,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   payee_location_id: z.string().uuid().describe('The payee location UUID'),
 });
 
@@ -27,7 +27,10 @@ Returns the details of a single payee location including coordinates.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       payee_location_id: {
         type: 'string',
         description: 'The payee location UUID',

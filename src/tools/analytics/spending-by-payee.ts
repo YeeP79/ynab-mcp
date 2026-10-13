@@ -16,7 +16,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   months: z
     .number()
     .int()
@@ -44,11 +44,23 @@ export const spendingByPayeeTool: Tool = {
   name: 'ynab_spending_by_payee',
   description: `Analyze spending patterns by merchant/payee.
 
-Returns top payees ranked by total spending with transaction counts and averages.`,
+Use when the user asks:
+- "Where do I spend the most?"
+- "Top merchants by spending"
+- "Which stores do I shop at most?"
+- "Show spending by payee"
+- "Who gets most of my money?"
+
+Returns top payees ranked by total spending with transaction counts and averages.
+
+Best for ranking merchants over the last few months. For one payee over any period use ynab_query (payees filter); to see its individual transactions use ynab_list_payee_transactions.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       months: {
         type: 'integer',
         description: 'Number of months to analyze (1-12, default 3)',

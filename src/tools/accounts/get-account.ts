@@ -15,7 +15,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   account_id: z.string().uuid().describe('The account UUID to retrieve'),
 });
 
@@ -24,11 +24,20 @@ export const getAccountTool: Tool = {
   name: 'ynab_get_account',
   description: `Get details about a specific account including balance and recent activity.
 
+Use when the user asks:
+- "Show me details for my checking account"
+- "What's the balance of [account name]?"
+- "Tell me about my savings account"
+- "Get info on a specific account"
+
 Requires an account_id. Use ynab_list_accounts first to find the account ID.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Budget UUID or "last-used". Defaults to YNAB_BUDGET_ID env var or "last-used"',
+      },
       account_id: {
         type: 'string',
         format: 'uuid',

@@ -14,7 +14,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
 });
 
 // Tool definition
@@ -22,11 +22,21 @@ export const ageOfMoneyTool: Tool = {
   name: 'ynab_age_of_money',
   description: `Get the Age of Money metric with explanation and tips.
 
+Use when the user asks:
+- "What's my age of money?"
+- "How old is my money?"
+- "Explain age of money"
+- "Am I living on last month's income?"
+- "How long does my money last?"
+
 Returns the current age of money with context and improvement tips.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
     },
     required: [],
   },

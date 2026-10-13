@@ -24,11 +24,23 @@ export const monthlyComparisonTool: Tool = {
   name: 'ynab_monthly_comparison',
   description: `Compare this month vs last month for spending and budgeting.
 
-Returns side-by-side comparison of spending, income, and category performance.`,
+Use when the user asks:
+- "How does this month compare to last month?"
+- "Am I spending more or less?"
+- "Month over month comparison"
+- "Compare my spending"
+- "What's changed since last month?"
+
+Returns side-by-side comparison of spending, income, and category performance.
+
+Only compares this month with last month. For longer periods use ynab_spending_trends or ynab_query.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Budget UUID or "last-used". Defaults to YNAB_BUDGET_ID env var or "last-used"',
+      },
     },
     required: [],
   },

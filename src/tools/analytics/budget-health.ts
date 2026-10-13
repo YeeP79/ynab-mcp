@@ -16,7 +16,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
 });
 
 // Tool definition
@@ -24,11 +24,23 @@ export const budgetHealthTool: Tool = {
   name: 'ynab_budget_health',
   description: `Get an overall budget health assessment.
 
-Provides key metrics, alerts, and recommendations.`,
+Use when the user asks:
+- "How is my budget doing?"
+- "What's my budget status?"
+- "Am I on track this month?"
+- "Budget health check"
+- "Any budget problems?"
+
+Provides key metrics, alerts, and recommendations.
+
+For a quick status rather than a scored assessment, use ynab_quick_summary.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
     },
     required: [],
   },

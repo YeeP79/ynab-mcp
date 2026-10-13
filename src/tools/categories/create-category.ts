@@ -21,7 +21,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   category_group_id: z
     .string()
     .uuid()
@@ -39,14 +39,22 @@ export const createCategoryTool: Tool = {
   name: 'ynab_create_category',
   description: `Create a new category inside an existing category group.
 
+Use when the user asks:
+- "Add a new category called X to my [group] group"
+- "Create a budgeting category for Y"
+- "Add a Pets category with a $150 monthly target"
+
 Requires a category_group_id. Use ynab_list_categories first to find the group ID.
 Optionally sets a target: target_amount creates a monthly "Needed for Spending" target.
 
-Write operation (requires YNAB_READ_ONLY=false).`,
+**Note:** This is a write operation. Requires YNAB_READ_ONLY=false.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       category_group_id: {
         type: 'string',
         description: 'The UUID of the category group to add the category to',

@@ -15,7 +15,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   transaction_id: z.string().uuid().describe('The transaction UUID to delete'),
 });
 
@@ -24,12 +24,20 @@ export const deleteTransactionTool: Tool = {
   name: 'ynab_delete_transaction',
   description: `Delete a transaction from a budget.
 
-Write operation (requires YNAB_READ_ONLY=false).
+Use when the user asks:
+- "Delete that transaction"
+- "Remove the transaction"
+- "Cancel that purchase entry"
+
+Requires READ_ONLY mode to be disabled (YNAB_READ_ONLY=false).
 This action cannot be undone.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       transaction_id: {
         type: 'string',
         description: 'The transaction UUID to delete',

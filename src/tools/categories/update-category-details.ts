@@ -23,7 +23,7 @@ const inputSchema = z
     budget_id: z
       .string()
       .optional()
-      .describe('Plan ID; defaults to the configured plan'),
+      .describe('Plan ID. Omit to use the configured plan.'),
     category_id: z.string().uuid().describe('The category UUID to update'),
     name: z.string().min(1).max(500).optional().describe('New name for the category'),
     note: z.string().max(500).nullable().optional().describe('New note. null clears it.'),
@@ -50,6 +50,13 @@ export const updateCategoryDetailsTool: Tool = {
   name: 'ynab_update_category_details',
   description: `Rename a category, move it to another group, change its note, or set its target.
 
+Use when the user asks:
+- "Rename Dining Out to Eating Out"
+- "Move Therapy into Bills"
+- "Set a $600 monthly target for Groceries"
+- "Make Insurance a refill-up-to target of $1,200"
+- "Remove the target from Hobbies"
+
 Only the fields you pass are changed. Targets: setting target_amount on a category
 without a target creates a monthly "Needed for Spending" target; target_amount null
 removes the target. To set one month's budgeted amount, use ynab_update_category.
@@ -59,11 +66,14 @@ or cadences; those must be done in the YNAB app.
 
 Requires a category_id. Use ynab_list_categories first to find category and group IDs.
 
-Write operation (requires YNAB_READ_ONLY=false).`,
+**Note:** This is a write operation. Requires YNAB_READ_ONLY=false.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       category_id: {
         type: 'string',
         description: 'The category UUID to update',

@@ -16,7 +16,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   since_date: z
     .string()
     .optional()
@@ -41,12 +41,26 @@ export const listTransactionsTool: Tool = {
   name: 'ynab_list_transactions',
   description: `List transactions for a budget with optional filters.
 
+Use when the user asks:
+- "Show my recent transactions"
+- "What did I spend this month?"
+- "List my uncategorized transactions"
+- "Show transactions since [date]"
+- "What purchases have I made recently?"
+- "Show me the past 7 days of transactions"
+- "What did I spend last week?"
+
 Supports filtering by date (ISO or natural language like "past 30 days", "this month") and type (uncategorized/unapproved).
-Returns transaction details including date, payee, amount, category, and status.`,
+Returns transaction details including date, payee, amount, category, and status.
+
+To find transactions by text, amount, payee or category, use ynab_transaction_search. To total or group amounts, use ynab_query.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       since_date: {
         type: 'string',
         description:

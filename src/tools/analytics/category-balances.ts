@@ -16,7 +16,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   filter: z
     .enum(['all', 'funded', 'unfunded', 'negative', 'positive'])
     .optional()
@@ -36,11 +36,23 @@ export const categoryBalancesTool: Tool = {
   name: 'ynab_category_balances',
   description: `Check category balances with optional filtering.
 
-Returns current category balances with filtering options.`,
+Use when the user asks:
+- "What's my balance in [category]?"
+- "How much do I have for groceries?"
+- "Show category balances"
+- "Which categories have money?"
+- "What categories are negative?"
+
+Returns current category balances with filtering options.
+
+Best for current balances filtered to overspent, underfunded or one group. To look up category IDs or notes, use ynab_list_categories.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       filter: {
         type: 'string',
         enum: ['all', 'funded', 'unfunded', 'negative', 'positive'],

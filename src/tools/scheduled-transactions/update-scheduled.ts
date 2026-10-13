@@ -18,7 +18,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   scheduled_transaction_id: z
     .string()
     .uuid()
@@ -63,12 +63,21 @@ export const updateScheduledTransactionTool: Tool = {
   name: 'ynab_update_scheduled_transaction',
   description: `Update an existing scheduled transaction in a budget.
 
-Write operation (requires YNAB_READ_ONLY=false).
+Use when the user asks:
+- "Change my subscription amount"
+- "Update recurring payment"
+- "Modify scheduled transaction"
+- "Change billing frequency"
+
+Requires READ_ONLY mode to be disabled (YNAB_READ_ONLY=false).
 Only provided fields will be updated.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       scheduled_transaction_id: {
         type: 'string',
         description: 'The scheduled transaction UUID to update',

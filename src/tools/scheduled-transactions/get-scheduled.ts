@@ -15,7 +15,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   scheduled_transaction_id: z.string().uuid().describe('The scheduled transaction UUID to retrieve'),
 });
 
@@ -24,11 +24,18 @@ export const getScheduledTransactionTool: Tool = {
   name: 'ynab_get_scheduled_transaction',
   description: `Get details about a specific scheduled transaction.
 
+Use when the user asks:
+- "Show me details for that scheduled transaction"
+- "What's the info on my Netflix subscription?"
+
 Requires a scheduled_transaction_id. Use ynab_list_scheduled_transactions first to find the ID.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       scheduled_transaction_id: {
         type: 'string',
         description: 'The scheduled transaction UUID to retrieve',

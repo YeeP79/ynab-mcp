@@ -17,7 +17,6 @@ Which tool for which question:
 - A written report for a period: follow the ynab-spending-report prompt.
 
 Reading the budget:
-- Leave budget_id out to use the configured plan; only pass it to work in a different plan (ynab_list_budgets lists them).
 - Category notes (in ynab_list_categories) describe what belongs in a category. Follow them when categorizing.
 - Memos may hold tags (#name) that group spending for a project or trip; ynab_query can group or filter by them.
 - Amounts are dollars unless a field says milliunits. Spending is money out; a refund reduces it.

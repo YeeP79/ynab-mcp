@@ -36,7 +36,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   kind: z.enum(KINDS).optional().describe('What to total (default "spending")'),
   group_by: z
     .array(z.enum(DIMENSIONS))
@@ -64,6 +64,14 @@ export const queryTool: Tool = {
   name: 'ynab_query',
   description: `Total and group transactions for reports and questions about past spending or income.
 
+Use when the user asks:
+- "How much did we spend on eating out each month this year?"
+- "Top payees in Household & Shopping over the last 12 months"
+- "Spending by category group last year"
+- "Everything tagged #vegas-2026" / "What did the #moonpatrol project cost?"
+- "How much did Amazon cost us by month?"
+- "Income by payee since January"
+
 Rules applied to every result (so totals match the budget):
 - Split transactions are counted per split line.
 - Transfers between accounts are not spending or income (kind "transfer" shows them).
@@ -75,11 +83,16 @@ Rules applied to every result (so totals match the budget):
 
 Amounts are in dollars. With no month/year grouping each row also has a
 monthly_average over the whole period. Rows beyond limit are combined into "other".
-Default period: the last 12 full months plus this month.`,
+Default period: the last 12 full months plus this month.
+
+Not for finding individual transactions (use ynab_transaction_search) or for how much is left in a category this month (use ynab_list_categories or ynab_category_balances).`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       kind: {
         type: 'string',
         enum: [...KINDS],

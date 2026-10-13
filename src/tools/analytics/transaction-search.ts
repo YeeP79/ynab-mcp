@@ -16,7 +16,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   query: z
     .string()
     .max(500)
@@ -62,11 +62,24 @@ export const transactionSearchTool: Tool = {
   name: 'ynab_transaction_search',
   description: `Search transactions with powerful filtering options.
 
-Supports filtering by payee, category, amount range, date range, and text search.`,
+Use when the user asks:
+- "Find transactions at [store]"
+- "Search for [keyword] in my transactions"
+- "Transactions over $100"
+- "What did I spend on [category]?"
+- "Find large purchases"
+- "Search my expenses"
+
+Supports filtering by payee, category, amount range, date range, and text search.
+
+Finds individual transactions. To total or group amounts (by month, category, payee, tag), use ynab_query.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       query: {
         type: 'string',
         maxLength: 500,

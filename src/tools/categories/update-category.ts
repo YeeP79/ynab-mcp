@@ -15,7 +15,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   month: z
     .string()
     .regex(/^\d{4}-\d{2}-01$/, 'Month must be first-of-month format (YYYY-MM-01)')
@@ -32,15 +32,26 @@ export const updateCategoryTool: Tool = {
   name: 'ynab_update_category',
   description: `Update the budgeted amount for a category in a specific month.
 
+Use when the user asks:
+- "Budget $500 for Groceries this month"
+- "Set my dining out budget to $200"
+- "Increase my entertainment budget"
+- "Change the budget for [category] to [amount]"
+
 Use first-of-month format for the month parameter (e.g., 2024-01-01 for January 2024).
 The budgeted amount is in dollars (e.g., 500.00 for $500).
 Requires a category_id. Use ynab_list_categories first to find the category ID.
 
-Write operation (requires YNAB_READ_ONLY=false).`,
+Only sets one month's assigned amount. To rename a category, move it, change its note, or set a target, use ynab_update_category_details.
+
+**Note:** This is a write operation. Requires YNAB_READ_ONLY=false.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       month: {
         type: 'string',
         description: 'The budget month in YYYY-MM-01 format (first of month)',

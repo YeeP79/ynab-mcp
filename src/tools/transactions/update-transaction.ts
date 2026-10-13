@@ -23,7 +23,7 @@ const inputSchema = z
     budget_id: z
       .string()
       .optional()
-      .describe('Plan ID; defaults to the configured plan'),
+      .describe('Plan ID. Omit to use the configured plan.'),
     transaction_id: z.string().uuid().describe('The transaction UUID to update'),
     account_id: z.string().uuid().optional().describe('New account UUID'),
     date: z
@@ -66,12 +66,24 @@ export const updateTransactionTool: Tool = {
   name: 'ynab_update_transaction',
   description: `Update an existing transaction.
 
-Write operation (requires YNAB_READ_ONLY=false).
-Only provide the fields you want to change.`,
+Use when the user asks:
+- "Change the category on that transaction"
+- "Update the amount"
+- "Mark transaction as cleared"
+- "Add a memo to the transaction"
+- "Recategorize a transaction"
+
+Requires READ_ONLY mode to be disabled (YNAB_READ_ONLY=false).
+Only provide the fields you want to change.
+
+To change several transactions at once (for example recategorizing a batch), use ynab_update_transactions.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       transaction_id: {
         type: 'string',
         description: 'The transaction UUID to update',

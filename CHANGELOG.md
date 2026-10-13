@@ -34,14 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   returns `null` instead of `"Unknown"` for these fields on transactions that
   weren't imported.
 
-### Changed
-
-- **Tool definitions are about 30% smaller** (roughly 14.8k to 10.4k tokens per
-  conversation). Example-question lists moved out of the 66 tool descriptions
-  (the server instructions now route questions), write notes were shortened,
-  and the identical `budget_id` description was dropped from every schema (the
-  instructions say to omit it). A test keeps the definitions under budget.
-
 ### Security
 
 - **HTTP header mode no longer serves the server-held token to the whole
@@ -81,6 +73,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the YNAB app. People no longer need to know tool names.
 - `ynab_list_categories` returns each category's note when it has one, so
   notes can describe what belongs in a category.
+- Tools whose jobs overlap (the reporting and analytics tools, single vs bulk
+  transaction edits, budgeted amount vs category details) now say when to use
+  each and which tool to use instead, so the right one is picked for plain
+  questions.
 - Releases attach `ynab-mcp-remote.mcpb` alongside the skill zips.
 - `since_date: "all"` (or `"all time"`) on the transaction tools above returns
   full history.

@@ -38,6 +38,12 @@ export const auditLogTool: Tool = {
   name: 'ynab_audit_log',
   description: `View the audit log of write operations.
 
+Use when the user asks:
+- "What changes have been made?"
+- "Show me the audit log"
+- "What transactions were created?"
+- "Were there any failed operations?"
+
 Shows all create, update, and delete operations with timestamps.`,
   inputSchema: {
     type: 'object',

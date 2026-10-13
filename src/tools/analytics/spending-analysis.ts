@@ -16,7 +16,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   months: z
     .number()
     .int()
@@ -32,11 +32,23 @@ export const spendingAnalysisTool: Tool = {
   name: 'ynab_spending_analysis',
   description: `Analyze spending patterns and trends.
 
-Provides category breakdowns, trends, and insights.`,
+Use when the user asks:
+- "How much am I spending?"
+- "What are my biggest expenses?"
+- "Show my spending trends"
+- "Analyze my spending habits"
+- "Where does my money go?"
+
+Provides category breakdowns, trends, and insights.
+
+Best for a category breakdown of the last few months with trends. For one category, payee or tag, or a custom period, use ynab_query; for income vs spending, use ynab_cash_flow_check.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       months: {
         type: 'number',
         description: 'Number of months to analyze (default 3)',

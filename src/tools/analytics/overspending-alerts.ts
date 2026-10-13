@@ -19,7 +19,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   threshold: z
     .number()
     .optional()
@@ -31,11 +31,21 @@ export const overspendingAlertsTool: Tool = {
   name: 'ynab_overspending_alerts',
   description: `Check for categories that are currently overspent.
 
+Use when the user asks:
+- "Am I overspending?"
+- "What categories are over budget?"
+- "Any overspending alerts?"
+- "Where am I in the red?"
+- "Check my budget status"
+
 Returns a quick list of all overspent categories with amounts.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       threshold: {
         type: 'number',
         description: 'Minimum overspend amount to report in dollars (default 0)',

@@ -16,7 +16,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   account_id: z.string().uuid().describe('The account UUID to get transactions for'),
   since_date: z
     .string()
@@ -38,11 +38,19 @@ export const listAccountTransactionsTool: Tool = {
   name: 'ynab_list_account_transactions',
   description: `List transactions for a specific account.
 
+Use when the user asks:
+- "Show transactions for my checking account"
+- "What purchases were made on my credit card?"
+- "List activity in [account name]"
+
 Requires an account_id. Use ynab_list_accounts first to find the account ID.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       account_id: {
         type: 'string',
         description: 'The account UUID to get transactions for',

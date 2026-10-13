@@ -15,7 +15,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   category_id: z.string().uuid().describe('The category UUID to retrieve'),
 });
 
@@ -24,11 +24,20 @@ export const getCategoryTool: Tool = {
   name: 'ynab_get_category',
   description: `Get details about a specific budget category including budgeted amount, activity, and goal status.
 
+Use when the user asks:
+- "Show me details for my Groceries category"
+- "What's the balance in [category name]?"
+- "How much is budgeted for [category]?"
+- "What's my goal progress for [category]?"
+
 Requires a category_id. Use ynab_list_categories first to find the category ID.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       category_id: {
         type: 'string',
         description: 'The category UUID to retrieve',

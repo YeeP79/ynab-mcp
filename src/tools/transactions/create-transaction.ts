@@ -22,7 +22,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   account_id: z.string().uuid().describe('The account UUID for this transaction'),
   date: z
     .string()
@@ -57,12 +57,23 @@ export const createTransactionTool: Tool = {
   name: 'ynab_create_transaction',
   description: `Create a new transaction in a budget.
 
-Write operation (requires YNAB_READ_ONLY=false).
-Amount should be negative for expenses/outflows and positive for income/inflows.`,
+Use when the user asks:
+- "Add a transaction for $50 at Amazon"
+- "Record a purchase"
+- "Log an expense"
+- "Create a transaction"
+
+Requires READ_ONLY mode to be disabled (YNAB_READ_ONLY=false).
+Amount should be negative for expenses/outflows and positive for income/inflows.
+
+To add several transactions at once, use ynab_create_transactions.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       account_id: {
         type: 'string',
         description: 'The account UUID for this transaction',

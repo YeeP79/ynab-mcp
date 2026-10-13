@@ -16,7 +16,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
 });
 
 // Tool definition
@@ -24,12 +24,24 @@ export const quickSummaryTool: Tool = {
   name: 'ynab_quick_summary',
   description: `Get a quick at-a-glance summary of the budget status.
 
+Use when the user asks:
+- "How's my budget looking?"
+- "Give me a quick overview"
+- "What's my financial status?"
+- "Summary of my finances"
+- "How much money do I have?"
+
 Returns key metrics: available funds, spending this month, account balances, and alerts.
-This is the best tool to use for general budget status questions.`,
+This is the best tool to use for general budget status questions.
+
+Fast current-month status. For a scored assessment use ynab_budget_health; for a full review follow the ynab-monthly-review prompt.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
     },
     required: [],
   },

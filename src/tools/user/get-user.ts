@@ -16,6 +16,11 @@ export const getUserTool: Tool = {
   name: 'ynab_get_user',
   description: `Get information about the authenticated YNAB user.
 
+Use when the user asks:
+- "Who am I logged in as?"
+- "What's my YNAB user ID?"
+- "Show my user ID"
+
 Returns the user's ID.`,
   inputSchema: {
     type: 'object',

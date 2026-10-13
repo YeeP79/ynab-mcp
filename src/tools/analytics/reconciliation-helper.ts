@@ -28,11 +28,21 @@ export const reconciliationHelperTool: Tool = {
   name: 'ynab_reconciliation_helper',
   description: `Help with account reconciliation by showing uncleared transactions.
 
+Use when the user asks:
+- "Help me reconcile my accounts"
+- "What transactions haven't cleared?"
+- "Show uncleared transactions"
+- "Pending transactions"
+- "Reconciliation status"
+
 Returns uncleared transactions organized by account with totals.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Budget UUID or "last-used". Defaults to YNAB_BUDGET_ID env var or "last-used"',
+      },
       account_id: {
         type: 'string',
         format: 'uuid',

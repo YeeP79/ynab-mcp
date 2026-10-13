@@ -16,7 +16,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   month: z
     .string()
     .regex(/^\d{4}-(0[1-9]|1[0-2])-01$/, 'Month must be first-of-month format (YYYY-MM-01) with valid month (01-12)')
@@ -33,11 +33,23 @@ export const budgetVsActualsTool: Tool = {
   name: 'ynab_budget_vs_actuals',
   description: `Compare budgeted amounts against actual spending for each category.
 
-Returns detailed budget vs actuals for all categories with variance analysis.`,
+Use when the user asks:
+- "How am I doing on my budget?"
+- "Am I over budget anywhere?"
+- "Compare budget vs actual"
+- "Which categories are overspent?"
+- "Show my budget performance"
+
+Returns detailed budget vs actuals for all categories with variance analysis.
+
+Covers one month, assigned vs spent per category. For only what is overspent right now, use ynab_overspending_alerts.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       month: {
         type: 'string',
         pattern: '^\\d{4}-(0[1-9]|1[0-2])-01$',

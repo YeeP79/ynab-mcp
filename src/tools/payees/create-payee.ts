@@ -14,7 +14,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   name: z.string().min(1).max(500).describe('The name of the new payee'),
 });
 
@@ -23,14 +23,21 @@ export const createPayeeTool: Tool = {
   name: 'ynab_create_payee',
   description: `Create a new payee.
 
+Use when the user asks:
+- "Add a payee called X"
+- "Create a new merchant"
+
 Most of the time payees are created automatically when you add a transaction with a
 new payee_name. Use this tool when you need a payee to exist ahead of time.
 
-Write operation (requires YNAB_READ_ONLY=false).`,
+**Note:** This is a write operation. Requires YNAB_READ_ONLY=false.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       name: {
         type: 'string',
         description: 'The name of the new payee',

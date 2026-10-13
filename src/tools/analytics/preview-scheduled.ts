@@ -19,7 +19,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   account_id: z.string().uuid().describe('The account UUID for this scheduled transaction'),
   amount: z
     .number()
@@ -58,12 +58,21 @@ export const previewScheduledTransactionTool: Tool = {
   name: 'ynab_preview_scheduled_transaction',
   description: `Preview a scheduled transaction before creating it.
 
+Use when the user asks:
+- "Show me what this scheduled transaction would look like"
+- "Preview recurring payment"
+- "What would this subscription cost annually?"
+- "Validate scheduled transaction"
+
 Validates all inputs and returns a preview with estimated costs.
 Does NOT create anything - use ynab_create_scheduled_transaction to actually create.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       account_id: {
         type: 'string',
         description: 'The account UUID for this scheduled transaction',

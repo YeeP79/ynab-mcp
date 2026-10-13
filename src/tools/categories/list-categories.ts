@@ -15,7 +15,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   include_hidden: z
     .boolean()
     .optional()
@@ -27,11 +27,23 @@ export const listCategoriesTool: Tool = {
   name: 'ynab_list_categories',
   description: `List all category groups and categories in a budget with budgeted amounts and balances.
 
-Returns category groups with their categories, including budgeted amounts, activity, and remaining balances.`,
+Use when the user asks:
+- "What categories do I have?"
+- "Show my budget categories"
+- "How is my budget organized?"
+- "What are my spending categories?"
+- "List my budget breakdown"
+
+Returns category groups with their categories, including budgeted amounts, activity, and remaining balances.
+
+For current balances filtered to overspent or underfunded categories, ynab_category_balances is more focused.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       include_hidden: {
         type: 'boolean',
         description: 'Whether to include hidden categories',

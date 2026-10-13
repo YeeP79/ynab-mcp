@@ -14,7 +14,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   payee_id: z.string().uuid().describe('The payee UUID to retrieve'),
 });
 
@@ -23,11 +23,18 @@ export const getPayeeTool: Tool = {
   name: 'ynab_get_payee',
   description: `Get details about a specific payee.
 
+Use when the user asks:
+- "Show me details for [payee]"
+- "Get info on a merchant"
+
 Requires a payee_id. Use ynab_list_payees first to find the payee ID.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       payee_id: {
         type: 'string',
         description: 'The payee UUID to retrieve',

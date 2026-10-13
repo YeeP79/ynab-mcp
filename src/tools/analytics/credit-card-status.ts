@@ -17,7 +17,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
 });
 
 // Tool definition
@@ -25,11 +25,21 @@ export const creditCardStatusTool: Tool = {
   name: 'ynab_credit_card_status',
   description: `Check credit card balances and payment category status.
 
+Use when the user asks:
+- "What's my credit card balance?"
+- "How much do I owe on credit cards?"
+- "Credit card payment status"
+- "Do I have enough to pay my credit cards?"
+- "Show credit card accounts"
+
 Returns credit card balances with corresponding payment category balances.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
     },
     required: [],
   },

@@ -18,7 +18,14 @@ const inputSchema = z.object({}).strict();
 // Tool definition
 export const healthCheckTool: Tool = {
   name: 'ynab_health_check',
-  description: `Check the health of the YNAB MCP server and API connection, for troubleshooting. Returns server status, API connectivity, and configuration details.`,
+  description: `Check the health of the YNAB MCP server and API connection.
+
+Use when:
+- Troubleshooting connection issues
+- Verifying the server is configured correctly
+- Checking if the YNAB API is accessible
+
+Returns server status, API connectivity, and configuration details.`,
   inputSchema: {
     type: 'object',
     properties: {},

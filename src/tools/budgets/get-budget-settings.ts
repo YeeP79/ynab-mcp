@@ -14,7 +14,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
 });
 
 // Tool definition
@@ -22,11 +22,20 @@ export const getBudgetSettingsTool: Tool = {
   name: 'ynab_get_budget_settings',
   description: `Get settings for a budget including currency format, date format, and other preferences.
 
+Use when the user asks:
+- "What currency is my budget in?"
+- "Show my budget settings"
+- "What's my budget date format?"
+- "What are my YNAB preferences?"
+
 Returns currency format, date format, and currency ISO code.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
     },
   },
 };

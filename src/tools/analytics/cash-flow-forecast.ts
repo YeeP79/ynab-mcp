@@ -15,7 +15,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   days: z
     .number()
     .int()
@@ -30,11 +30,23 @@ export const cashFlowForecastTool: Tool = {
   name: 'ynab_cash_flow_forecast',
   description: `Project future cash flow based on scheduled transactions.
 
-Returns projected cash flow including scheduled income and expenses.`,
+Use when the user asks:
+- "What's my cash flow forecast?"
+- "Will I have enough money next month?"
+- "What bills are coming up?"
+- "Project my account balance"
+- "When will I run low on money?"
+
+Returns projected cash flow including scheduled income and expenses.
+
+Looks forward using scheduled transactions. For past income vs spending, use ynab_cash_flow_check.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       days: {
         type: 'number',
         description: 'Number of days to forecast (default 30)',

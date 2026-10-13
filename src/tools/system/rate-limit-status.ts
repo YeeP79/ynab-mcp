@@ -14,7 +14,14 @@ const inputSchema = z.object({}).strict();
 // Tool definition
 export const rateLimitStatusTool: Tool = {
   name: 'ynab_rate_limit_status',
-  description: `Check how many YNAB API requests remain before a large operation. YNAB allows 200 requests per hour. This server uses 180 as a safety margin.`,
+  description: `Check the current YNAB API rate limit status.
+
+Use when you need to:
+- Check how many API requests are available
+- See if rate limiting might affect operations
+- Plan large operations that require many API calls
+
+YNAB allows 200 requests per hour. This server uses 180 as a safety margin.`,
   inputSchema: {
     type: 'object',
     properties: {},

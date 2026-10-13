@@ -16,7 +16,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
 });
 
 // Tool definition
@@ -24,11 +24,21 @@ export const spendingPaceTool: Tool = {
   name: 'ynab_spending_pace',
   description: `Track daily spending rate and project end-of-month status.
 
+Use when the user asks:
+- "Am I on track this month?"
+- "What's my spending pace?"
+- "Will I stay within budget?"
+- "How much can I spend per day?"
+- "Daily spending rate"
+
 Returns current spending rate vs target rate with projections.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
     },
     required: [],
   },

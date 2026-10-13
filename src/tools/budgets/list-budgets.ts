@@ -23,6 +23,12 @@ export const listBudgetsTool: Tool = {
   name: 'ynab_list_budgets',
   description: `List all budgets the user has access to in YNAB.
 
+Use when the user asks:
+- "What budgets do I have?"
+- "Show me my YNAB budgets"
+- "List my budgets"
+- "Which budget should I use?"
+
 Returns budget names, IDs, and last modified dates. Optionally includes account summaries.`,
   inputSchema: {
     type: 'object',

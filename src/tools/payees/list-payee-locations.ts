@@ -14,7 +14,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
 });
 
 // Tool definition
@@ -22,11 +22,20 @@ export const listPayeeLocationsTool: Tool = {
   name: 'ynab_list_payee_locations',
   description: `List all payee locations for a budget.
 
+Use when the user asks:
+- "Where are my payees located?"
+- "Show payee locations"
+- "Map of where I spend"
+- "Payee geographic data"
+
 Returns payee locations with latitude/longitude for mapping purposes.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
     },
     required: [],
   },

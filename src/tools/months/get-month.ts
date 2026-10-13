@@ -16,7 +16,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   month: z
     .string()
     .refine(
@@ -31,12 +31,21 @@ export const getMonthTool: Tool = {
   name: 'ynab_get_month',
   description: `Get detailed information about a specific budget month including all categories.
 
+Use when the user asks:
+- "Show me January's budget"
+- "What did I budget last month?"
+- "Give me details for [month]"
+- "How much did I have to budget in [month]?"
+
 Use first-of-month format for the month parameter (e.g., 2024-01-01 for January 2024).
 Use "current" for the current month.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       month: {
         type: 'string',
         description:

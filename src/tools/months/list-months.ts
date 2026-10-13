@@ -15,7 +15,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
 });
 
 // Tool definition
@@ -23,11 +23,20 @@ export const listMonthsTool: Tool = {
   name: 'ynab_list_months',
   description: `List all budget months with summary information.
 
+Use when the user asks:
+- "Show my budget months"
+- "What months do I have budgeted?"
+- "List my budget history"
+- "Show me past months"
+
 Returns each month's income, budgeted, activity, and to-be-budgeted amounts.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
     },
   },
 };

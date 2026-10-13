@@ -16,7 +16,7 @@ const inputSchema = z.object({
   budget_id: z
     .string()
     .optional()
-    .describe('Plan ID; defaults to the configured plan'),
+    .describe('Plan ID. Omit to use the configured plan.'),
   category_id: z.string().uuid().describe('The category UUID to get transactions for'),
   since_date: z
     .string()
@@ -38,11 +38,19 @@ export const listCategoryTransactionsTool: Tool = {
   name: 'ynab_list_category_transactions',
   description: `List transactions for a specific category.
 
+Use when the user asks:
+- "Show my grocery transactions"
+- "What did I spend on dining out?"
+- "List transactions in [category name]"
+
 Requires a category_id. Use ynab_list_categories first to find the category ID.`,
   inputSchema: {
     type: 'object',
     properties: {
-      budget_id: { type: 'string' },
+      budget_id: {
+        type: 'string',
+        description: 'Plan ID. Omit to use the configured plan.',
+      },
       category_id: {
         type: 'string',
         format: 'uuid',
