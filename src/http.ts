@@ -13,7 +13,7 @@
  * audit log — nothing leaks between users.
  */
 
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import express, { type Request, type Response } from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
@@ -27,6 +27,41 @@ import { Encryptor } from './crypto.js';
 import { createStorage } from './storage/index.js';
 import { McpOAuthProvider } from './auth/mcp-provider.js';
 import { YnabTokenResolver } from './auth/user-session.js';
+import { RateLimiter } from './services/rate-limiter.js';
+
+const sha256 = (value: string): Buffer => createHash('sha256').update(value).digest();
+
+/** True when HOST binds only the loopback interface. */
+export function isLoopbackHost(host: string | undefined): boolean {
+  if (host === undefined) return false;
+  const h = host.trim().toLowerCase();
+  return h === 'localhost' || h === '::1' || h === '[::1]' || /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(h);
+}
+
+/**
+ * Refuse configurations that hand the server-held YNAB token to anyone who can
+ * reach the port. In header mode a request without X-YNAB-Token falls back to
+ * YNAB_ACCESS_TOKEN, so with no MCP_API_KEYS and a non-loopback bind the whole
+ * network gets full access to the budget.
+ */
+export function assertSafeExposure(config: HttpConfig): void {
+  if (config.authMode === 'oauth' && config.apiKeys) {
+    throw new Error('MCP_API_KEYS applies to header auth only; unset it when the YNAB OAuth variables are configured.');
+  }
+  if (
+    config.authMode === 'header' &&
+    config.fallbackAccessToken &&
+    !config.apiKeys &&
+    !isLoopbackHost(config.host) &&
+    !config.allowUnauthenticatedFallback
+  ) {
+    throw new Error(
+      'Refusing to start: YNAB_ACCESS_TOKEN is set and the server is reachable beyond localhost with no MCP_API_KEYS, ' +
+        'so any client on the network would get full access to the budget. Set MCP_API_KEYS (name:key pairs), ' +
+        'bind HOST=127.0.0.1, or set ALLOW_UNAUTHENTICATED_FALLBACK=true if an authenticating proxy sits in front.'
+    );
+  }
+}
 
 function jsonRpcError(code: number, message: string): unknown {
   return { jsonrpc: '2.0', error: { code, message }, id: null };
@@ -56,6 +91,7 @@ type ContextResult =
  * Exported for testing without binding a port.
  */
 export async function createHttpApp(config: HttpConfig): Promise<express.Express> {
+  assertSafeExposure(config);
   const app = express();
   // Number of reverse-proxy hops to trust for X-Forwarded-* (rate limiting, audit
   // logging). Defaults to 0 (trust none) so a self-hosted, direct-exposed instance
@@ -150,6 +186,35 @@ export async function createHttpApp(config: HttpConfig): Promise<express.Express
     };
   } else {
     // --- Interim header mode ---
+    if (config.apiKeys) {
+      // Compare digests so length differences don't short-circuit and timing stays constant.
+      const keyDigests = config.apiKeys.map((k) => ({ name: k.name, digest: sha256(k.key) }));
+      app.use('/mcp', (req: Request, res: Response, next) => {
+        const match = /^Bearer\s+(.+)$/i.exec(req.header('authorization') ?? '');
+        const presented = match?.[1] ? sha256(match[1].trim()) : undefined;
+        const client = presented ? keyDigests.find((k) => timingSafeEqual(k.digest, presented)) : undefined;
+        if (!client) {
+          res.setHeader('WWW-Authenticate', 'Bearer realm="ynab-mcp"');
+          res.status(401).json(jsonRpcError(-32001, 'Unauthorized: provide a valid MCP API key as a Bearer token'));
+          return;
+        }
+        res.locals['apiClient'] = client.name;
+        next();
+      });
+    }
+
+    // One limiter per YNAB token, shared across sessions (YNAB rate-limits per token).
+    const limiters = new Map<string, RateLimiter>();
+    const limiterFor = (token: string): RateLimiter => {
+      const id = sha256(token).toString('hex');
+      let limiter = limiters.get(id);
+      if (!limiter) {
+        limiter = new RateLimiter(config.rateLimitPerHour);
+        limiters.set(id, limiter);
+      }
+      return limiter;
+    };
+
     resolveInitContext = async (req: Request): Promise<ContextResult> => {
       const token = req.header('x-ynab-token') ?? config.fallbackAccessToken;
       if (!token) {
@@ -163,6 +228,7 @@ export async function createHttpApp(config: HttpConfig): Promise<express.Express
           readOnly: config.readOnly,
           rateLimitPerHour: config.rateLimitPerHour,
           cacheTtlMs: config.cacheTtlMs,
+          rateLimiter: limiterFor(token),
         },
       };
     };
@@ -234,16 +300,23 @@ export async function startHttpServer(
   config: HttpConfig
 ): Promise<ReturnType<express.Express['listen']>> {
   const app = await createHttpApp(config);
-  const httpServer = app.listen(config.port, () => {
-    console.error(`YNAB MCP Server (HTTP, ${config.authMode} auth) listening on port ${config.port}`);
+  const onListening = (): void => {
+    console.error(
+      `YNAB MCP Server (HTTP, ${config.authMode} auth) listening on ${config.host ?? 'all interfaces'}, port ${config.port}`
+    );
     console.error(
       config.readOnly ? 'READ-ONLY mode (write operations disabled)' : 'WRITE operations ENABLED'
     );
     if (config.authMode === 'header') {
       console.error(
-        'Interim auth: YNAB token via X-YNAB-Token header (TLS required; set the YNAB OAuth env vars to enable OAuth)'
+        config.apiKeys
+          ? `API key auth: ${config.apiKeys.length} client key(s) configured (${config.apiKeys.map((k) => k.name).join(', ')})`
+          : 'Interim auth: YNAB token via X-YNAB-Token header (TLS required; set the YNAB OAuth env vars to enable OAuth)'
       );
     }
-  });
+  };
+  const httpServer = config.host
+    ? app.listen(config.port, config.host, onListening)
+    : app.listen(config.port, onListening);
   return httpServer;
 }

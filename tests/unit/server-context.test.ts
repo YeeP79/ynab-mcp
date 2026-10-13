@@ -4,6 +4,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { buildYnabClient, createServerForUser, type UserContext } from '../../src/server.js';
+import { RateLimiter } from '../../src/services/rate-limiter.js';
 
 const baseCtx: Omit<UserContext, 'accessToken' | 'readOnly'> = {
   defaultBudgetId: undefined,
@@ -12,6 +13,23 @@ const baseCtx: Omit<UserContext, 'accessToken' | 'readOnly'> = {
 };
 
 describe('buildYnabClient (per-user isolation)', () => {
+  it('uses a shared rate limiter from the context when given one', async () => {
+    const shared = new RateLimiter(180);
+    const a = buildYnabClient({ ...baseCtx, accessToken: 't', readOnly: true, rateLimiter: shared });
+    const b = buildYnabClient({ ...baseCtx, accessToken: 't', readOnly: true, rateLimiter: shared });
+
+    await shared.acquire();
+    // Both sessions see the same budget being spent, because YNAB limits per token.
+    expect(a.getRateLimitStatus()).toEqual(b.getRateLimitStatus());
+    expect(a.getRateLimitStatus()).toEqual(shared.getStatus());
+  });
+
+  it('creates its own rate limiter when none is shared', async () => {
+    const a = buildYnabClient({ ...baseCtx, accessToken: 't', readOnly: true });
+    const b = buildYnabClient({ ...baseCtx, accessToken: 't', readOnly: true });
+    expect(a.getRateLimitStatus()).toEqual(b.getRateLimitStatus());
+  });
+
   it('gives each user its own audit log instance', () => {
     const a = buildYnabClient({ ...baseCtx, accessToken: 'token-a', readOnly: false });
     const b = buildYnabClient({ ...baseCtx, accessToken: 'token-b', readOnly: false });

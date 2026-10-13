@@ -83,8 +83,23 @@ export type HttpAuthMode = 'header' | 'oauth';
 /** Persistence driver for the OAuth server. */
 export type StorageDriver = 'memory' | 'sqlite' | 'postgres';
 
+/** A named shared secret a LAN client presents as `Authorization: Bearer <key>`. */
+export interface ApiKey {
+  name: string;
+  key: string;
+}
+
+/** Minimum length for an MCP_API_KEYS secret (e.g. `openssl rand -hex 32` gives 64). */
+export const MIN_API_KEY_LENGTH = 32;
+
 export interface HttpConfig {
   port: number;
+  /** Interface to bind (HOST). Undefined = all interfaces (Node default). */
+  host: string | undefined;
+  /** Header mode only: when set, every /mcp request must present one of these keys. */
+  apiKeys: ApiKey[] | undefined;
+  /** Opt-out of the startup guard that refuses a network-reachable server-held token with no API keys. */
+  allowUnauthenticatedFallback: boolean;
   publicUrl: string | undefined;
   allowedHosts: string[] | undefined;
   allowedOrigins: string[] | undefined;
@@ -114,6 +129,34 @@ export interface HttpConfig {
   databaseUrl: string | undefined;
 }
 
+/**
+ * Parse MCP_API_KEYS: comma-separated `name:key` pairs, e.g. `laptop:<hex>,desktop:<hex>`.
+ * Names label the client in logs; keys must be at least MIN_API_KEY_LENGTH characters.
+ */
+export function parseApiKeys(value: string | undefined): ApiKey[] | undefined {
+  const items = parseList(value);
+  if (!items) return undefined;
+  const keys: ApiKey[] = [];
+  for (const item of items) {
+    const sep = item.indexOf(':');
+    const name = sep > 0 ? item.slice(0, sep).trim() : '';
+    const key = sep > 0 ? item.slice(sep + 1).trim() : '';
+    if (!/^[A-Za-z0-9_-]{1,32}$/.test(name)) {
+      throw new Error('Invalid MCP_API_KEYS entry: expected "name:key" with a name of letters, digits, "-" or "_".');
+    }
+    if (key.length < MIN_API_KEY_LENGTH) {
+      throw new Error(
+        `Invalid MCP_API_KEYS entry "${name}": key must be at least ${MIN_API_KEY_LENGTH} characters (try: openssl rand -hex 32).`
+      );
+    }
+    if (keys.some((k) => k.name === name || k.key === key)) {
+      throw new Error(`Invalid MCP_API_KEYS: duplicate name or key for "${name}".`);
+    }
+    keys.push({ name, key });
+  }
+  return keys;
+}
+
 function parseStorageDriver(value: string | undefined): StorageDriver {
   const v = (value ?? 'memory').toLowerCase();
   if (v === 'memory' || v === 'sqlite' || v === 'postgres') return v;
@@ -132,6 +175,13 @@ export function loadHttpConfig(): HttpConfig {
 
   return {
     port: parseInteger(process.env['PORT'], 3000, 'PORT'),
+    host: process.env['HOST'] || undefined,
+    apiKeys: parseApiKeys(process.env['MCP_API_KEYS']),
+    allowUnauthenticatedFallback: parseBoolean(
+      process.env['ALLOW_UNAUTHENTICATED_FALLBACK'],
+      false,
+      'ALLOW_UNAUTHENTICATED_FALLBACK'
+    ),
     publicUrl: publicUrl ? publicUrl.replace(/\/+$/, '') : undefined,
     allowedHosts,
     allowedOrigins,

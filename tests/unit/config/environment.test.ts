@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { loadConfig } from '../../../src/config/environment.js';
+import { loadConfig, parseApiKeys } from '../../../src/config/environment.js';
 
 const VALID_TOKEN = 'a'.repeat(40);
 const VALID_UUID = '12345678-1234-1234-1234-123456789012';
@@ -197,5 +197,32 @@ describe('loadConfig', () => {
       process.env['RATE_LIMIT_PER_HOUR'] = '12.5';
       expect(() => loadConfig()).toThrow(/Invalid integer value "12.5"/);
     });
+  });
+});
+
+describe('parseApiKeys', () => {
+  it('returns undefined when unset or empty', () => {
+    expect(parseApiKeys(undefined)).toBeUndefined();
+    expect(parseApiKeys('  ')).toBeUndefined();
+  });
+
+  it('parses named keys', () => {
+    expect(parseApiKeys('laptop:kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk1, desktop:kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk2')).toEqual([
+      { name: 'laptop', key: 'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk1' },
+      { name: 'desktop', key: 'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk2' },
+    ]);
+  });
+
+  it('keeps colons inside the key', () => {
+    expect(parseApiKeys('laptop:kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk:x')?.[0]?.key).toBe('kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk:x');
+  });
+
+  it('rejects short keys, bad names, missing names and duplicates', () => {
+    expect(() => parseApiKeys('laptop:short')).toThrow('at least 32');
+    expect(() => parseApiKeys('bad name:kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk')).toThrow('name:key');
+    expect(() => parseApiKeys(':kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk')).toThrow('name:key');
+    expect(() => parseApiKeys('kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk')).toThrow('name:key');
+    expect(() => parseApiKeys('a:kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk1,a:kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk2')).toThrow('duplicate');
+    expect(() => parseApiKeys('a:kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk,b:kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk')).toThrow('duplicate');
   });
 });

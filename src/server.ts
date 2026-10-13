@@ -38,13 +38,19 @@ export interface UserContext {
   readOnly: boolean;
   rateLimitPerHour: number;
   cacheTtlMs: number;
+  /**
+   * Limiter shared by every session using the same YNAB token. YNAB's limit is
+   * per token, so separate limiters per session would together overrun it.
+   */
+  rateLimiter?: RateLimiter | undefined;
 }
 
 /**
- * Build a fully-isolated YnabClient (own rate limiter, cache, and audit log).
+ * Build a YnabClient with its own cache and audit log, and either the shared
+ * per-token rate limiter from the context or a fresh one.
  */
 export function buildYnabClient(ctx: UserContext): YnabClient {
-  const rateLimiter = new RateLimiter(ctx.rateLimitPerHour);
+  const rateLimiter = ctx.rateLimiter ?? new RateLimiter(ctx.rateLimitPerHour);
   const cache = new Cache(ctx.cacheTtlMs);
   const auditLog = new AuditLog();
   return new YnabClient(
