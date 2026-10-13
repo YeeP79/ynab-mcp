@@ -4,6 +4,7 @@ import {
   sanitizeStringOrEmpty,
   sanitizeMemo,
   sanitizeName,
+  sanitizeOptionalName,
   sanitizeErrorMessage,
 } from '../../../src/utils/sanitize.js';
 
@@ -130,6 +131,18 @@ describe('sanitize utilities', () => {
 
     it('returns null for undefined input', () => {
       expect(sanitizeMemo(undefined)).toBeNull();
+    });
+  });
+
+  describe('sanitizeOptionalName', () => {
+    it('returns null rather than "Unknown" when absent or empty', () => {
+      expect(sanitizeOptionalName(null)).toBeNull();
+      expect(sanitizeOptionalName(undefined)).toBeNull();
+      expect(sanitizeOptionalName('')).toBeNull();
+    });
+
+    it('sanitizes present values like sanitizeName', () => {
+      expect(sanitizeOptionalName('SQ *COFFEE')).toBe(sanitizeName('SQ *COFFEE'));
     });
   });
 

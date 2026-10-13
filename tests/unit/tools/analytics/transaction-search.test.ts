@@ -133,6 +133,31 @@ describe('handleTransactionSearch', () => {
     });
   });
 
+  it("matches query and payee filters against the bank's original description", async () => {
+    const imported = { ...mockGroceryTransactions[0]!, import_payee_name_original: 'SPOPARKERGARAGE PARKER CO' };
+    mockClient.getTransactions.mockResolvedValue(
+      createTransactionsResponse([imported, ...mockGroceryTransactions.slice(1)])
+    );
+
+    for (const args of [{ query: 'parkergarage' }, { payee: 'SPOPARKER' }]) {
+      const result = JSON.parse(await handleTransactionSearch(args, mockClient as never));
+      expect(result.summary.total_matches).toBe(1);
+      expect(result.transactions[0].import_payee_name_original).toBe('SPOPARKERGARAGE PARKER CO');
+    }
+  });
+
+  it('reports the default window instead of claiming to search from the beginning', async () => {
+    mockClient.getTransactions.mockResolvedValue(createTransactionsResponse(mockGroceryTransactions));
+
+    const result = JSON.parse(await handleTransactionSearch({}, mockClient as never));
+
+    const [, options] = mockClient.getTransactions.mock.calls[0] as [string, { sinceDate: string }];
+    expect(options.sinceDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(result.search.date_range.from).toBe(options.sinceDate);
+    expect(result.search.date_range.from).not.toBe('beginning');
+    expect(result.search.date_filter.source).toBe('default');
+  });
+
   it('returns empty results gracefully', async () => {
     mockClient.getTransactions.mockResolvedValue(createTransactionsResponse([]));
 

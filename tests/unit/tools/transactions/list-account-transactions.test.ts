@@ -38,11 +38,14 @@ describe('handleListAccountTransactions', () => {
     expect(parsed.summary.total_inflow).toBeDefined();
     expect(parsed.summary.total_outflow).toBeDefined();
     expect(parsed.summary.net).toBeDefined();
+    // No since_date: an explicit default is sent instead of letting YNAB apply a silent window
     expect(mockClient.getAccountTransactions).toHaveBeenCalledWith(
       'test-budget-id',
       ACCOUNT_ID,
-      undefined
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/)
     );
+    expect(parsed.date_filter.source).toBe('default');
+    expect(parsed.date_filter.note).toContain('30 days');
   });
 
   it('applies limit and passes parsed since_date', async () => {

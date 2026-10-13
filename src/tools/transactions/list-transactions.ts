@@ -8,8 +8,8 @@ import { z } from 'zod';
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { YnabClient } from '../../services/ynab-client.js';
 import { formatCurrency, sumMilliunits } from '../../utils/milliunits.js';
-import { parseNaturalDate } from '../../utils/dates.js';
-import { sanitizeName, sanitizeMemo } from '../../utils/sanitize.js';
+import { resolveSinceDate } from '../../utils/dates.js';
+import { sanitizeName, sanitizeMemo, sanitizeOptionalName } from '../../utils/sanitize.js';
 
 // Input schema
 const inputSchema = z.object({
@@ -21,7 +21,7 @@ const inputSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Only return transactions on or after this date. Accepts ISO dates (YYYY-MM-DD) or natural language: "today", "yesterday", "this week", "last week", "this month", "last month", "past 7 days", "past 30 days"'
+      'Only return transactions on or after this date. Accepts ISO dates (YYYY-MM-DD) or natural language: "today", "yesterday", "this week", "last week", "this month", "last month", "past 7 days", "past 30 days", or "all" for full history. Defaults to the last 30 days when omitted.'
     ),
   type: z
     .enum(['uncategorized', 'unapproved'])
@@ -62,7 +62,7 @@ Returns transaction details including date, payee, amount, category, and status.
       since_date: {
         type: 'string',
         description:
-          'Only return transactions on or after this date. Accepts YYYY-MM-DD or natural language: "today", "this week", "past 30 days", etc.',
+          'Only return transactions on or after this date. Accepts YYYY-MM-DD or natural language: "today", "this week", "past 30 days", etc., or "all" for full history. Defaults to the last 30 days when omitted.',
       },
       type: {
         type: 'string',
@@ -89,14 +89,12 @@ export async function handleListTransactions(
   const budgetId = client.resolveBudgetId(validated.budget_id);
   const limit = validated.limit ?? 100;
 
+  // Always send an explicit since_date: omitting it makes YNAB apply a silent server-side window
+  const dateFilter = resolveSinceDate(validated.since_date);
   const options: {
-    sinceDate?: string;
+    sinceDate: string;
     type?: 'uncategorized' | 'unapproved';
-  } = {};
-  if (validated.since_date !== undefined) {
-    // Parse natural language dates like "past 7 days", "this month", etc.
-    options.sinceDate = parseNaturalDate(validated.since_date);
-  }
+  } = { sinceDate: dateFilter.since_date };
   if (validated.type !== undefined) {
     options.type = validated.type;
   }
@@ -128,6 +126,7 @@ export async function handleListTransactions(
     amount: formatCurrency(txn.amount),
     memo: sanitizeMemo(txn.memo),
     payee_name: sanitizeName(txn.payee_name),
+    import_payee_name_original: sanitizeOptionalName(txn.import_payee_name_original),
     category_name: sanitizeName(txn.category_name),
     account_name: sanitizeName(txn.account_name),
     cleared: txn.cleared,
@@ -161,9 +160,7 @@ export async function handleListTransactions(
         date_range: minDate && maxDate ? { from: minDate, to: maxDate } : null,
       },
       filters_applied: {
-        since_date: validated.since_date
-          ? { input: validated.since_date, parsed: options.sinceDate }
-          : null,
+        since_date: dateFilter,
         type: validated.type ?? null,
         limit,
       },

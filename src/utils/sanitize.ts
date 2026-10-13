@@ -76,6 +76,16 @@ export function sanitizeName(input: string | null | undefined): string {
 }
 
 /**
+ * Like sanitizeName, but returns null when the value is absent, for optional
+ * fields (e.g. a bank's original payee text, which only imported transactions have)
+ * where "Unknown" would be misleading.
+ */
+export function sanitizeOptionalName(input: string | null | undefined): string | null {
+  const sanitized = sanitizeString(input, 200);
+  return sanitized && sanitized.length > 0 ? sanitized : null;
+}
+
+/**
  * Patterns that may indicate sensitive data in error messages.
  * Used to redact potential tokens, paths, and other sensitive information.
  */

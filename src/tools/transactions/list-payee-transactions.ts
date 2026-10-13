@@ -8,8 +8,8 @@ import { z } from 'zod';
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { YnabClient } from '../../services/ynab-client.js';
 import { formatCurrency, sumMilliunits } from '../../utils/milliunits.js';
-import { parseNaturalDate } from '../../utils/dates.js';
-import { sanitizeName, sanitizeMemo } from '../../utils/sanitize.js';
+import { resolveSinceDate } from '../../utils/dates.js';
+import { sanitizeName, sanitizeMemo, sanitizeOptionalName } from '../../utils/sanitize.js';
 
 // Input schema
 const inputSchema = z.object({
@@ -22,7 +22,7 @@ const inputSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Only return transactions on or after this date. Accepts ISO dates (YYYY-MM-DD) or natural language like "past 30 days", "this month"'
+      'Only return transactions on or after this date. Accepts ISO dates (YYYY-MM-DD), natural language like "past 30 days" or "this month", or "all" for full history. Defaults to the last 30 days when omitted.'
     ),
   limit: z
     .number()
@@ -59,7 +59,7 @@ Requires a payee_id. Use ynab_list_payees first to find the payee ID.`,
       since_date: {
         type: 'string',
         description:
-          'Only return transactions on or after this date. Accepts YYYY-MM-DD or natural language like "past 30 days"',
+          'Only return transactions on or after this date. Accepts YYYY-MM-DD, natural language like "past 30 days", or "all" for full history. Defaults to the last 30 days when omitted.',
       },
       limit: {
         type: 'integer',
@@ -85,12 +85,12 @@ export async function handleListPayeeTransactions(
   const limit = validated.limit ?? 100;
 
   // Parse natural language dates
-  const sinceDate = validated.since_date ? parseNaturalDate(validated.since_date) : undefined;
+  const dateFilter = resolveSinceDate(validated.since_date);
 
   const response = await client.getPayeeTransactions(
     budgetId,
     validated.payee_id,
-    sinceDate
+    dateFilter.since_date
   );
 
   // Sort by date descending and apply limit (avoid mutating response)
@@ -124,6 +124,7 @@ export async function handleListPayeeTransactions(
     date: txn.date,
     amount: formatCurrency(txn.amount),
     memo: sanitizeMemo(txn.memo),
+    import_payee_name_original: sanitizeOptionalName(txn.import_payee_name_original),
     category_name: sanitizeName(txn.category_name),
     account_name: sanitizeName(txn.account_name),
     cleared: txn.cleared,
@@ -132,6 +133,7 @@ export async function handleListPayeeTransactions(
   return JSON.stringify(
     {
       payee_id: validated.payee_id,
+      date_filter: dateFilter,
       transactions: formattedTransactions,
       summary: {
         count: formattedTransactions.length,

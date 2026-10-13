@@ -8,8 +8,8 @@ import { z } from 'zod';
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { YnabClient } from '../../services/ynab-client.js';
 import { formatCurrency, sumMilliunits } from '../../utils/milliunits.js';
-import { parseNaturalDate } from '../../utils/dates.js';
-import { sanitizeName, sanitizeMemo } from '../../utils/sanitize.js';
+import { parseNaturalDate, resolveSinceDate } from '../../utils/dates.js';
+import { sanitizeName, sanitizeMemo, sanitizeOptionalName } from '../../utils/sanitize.js';
 
 // Input schema
 const inputSchema = z.object({
@@ -37,7 +37,9 @@ const inputSchema = z.object({
   since_date: z
     .string()
     .optional()
-    .describe('Start date (YYYY-MM-DD or natural language like "last month")'),
+    .describe(
+      'Start date (YYYY-MM-DD, natural language like "last month", or "all" for full history). Defaults to the last 30 days when omitted.'
+    ),
   until_date: z
     .string()
     .optional()
@@ -101,7 +103,8 @@ Supports filtering by payee, category, amount range, date range, and text search
       },
       since_date: {
         type: 'string',
-        description: 'Start date (YYYY-MM-DD or natural language)',
+        description:
+          'Start date (YYYY-MM-DD, natural language, or "all" for full history). Defaults to the last 30 days when omitted.',
       },
       until_date: {
         type: 'string',
@@ -126,6 +129,8 @@ Supports filtering by payee, category, amount range, date range, and text search
 interface SearchResult {
   date: string;
   payee: string;
+  /** The bank's original description, for imported transactions. */
+  import_payee_name_original: string | null;
   category: string | null;
   amount: string;
   amount_raw: number;
@@ -148,18 +153,15 @@ export async function handleTransactionSearch(
   const type = validated.type ?? 'all';
 
   // Parse dates
-  const sinceDate = validated.since_date
-    ? parseNaturalDate(validated.since_date)
-    : undefined;
+  // Always send an explicit since_date: omitting it makes YNAB apply a silent server-side window
+  const dateFilter = resolveSinceDate(validated.since_date);
+  const sinceDate = dateFilter.since_date;
   const untilDate = validated.until_date
     ? parseNaturalDate(validated.until_date)
     : undefined;
 
   // Fetch data
-  const transactionOptions: { sinceDate?: string } = {};
-  if (sinceDate) {
-    transactionOptions.sinceDate = sinceDate;
-  }
+  const transactionOptions = { sinceDate };
 
   const [transactionsResponse, categoriesResponse, accountsResponse] = await Promise.all([
     client.getTransactions(budgetId, transactionOptions),
@@ -210,7 +212,9 @@ export async function handleTransactionSearch(
   if (validated.payee) {
     const payeeSearch = validated.payee.toLowerCase();
     transactions = transactions.filter(
-      (t) => t.payee_name?.toLowerCase().includes(payeeSearch)
+      (t) =>
+        t.payee_name?.toLowerCase().includes(payeeSearch) ||
+        t.import_payee_name_original?.toLowerCase().includes(payeeSearch)
     );
   }
 
@@ -228,7 +232,9 @@ export async function handleTransactionSearch(
   if (validated.query) {
     const queryLower = validated.query.toLowerCase();
     transactions = transactions.filter((t) => {
-      const payeeMatch = t.payee_name?.toLowerCase().includes(queryLower);
+      const payeeMatch =
+        t.payee_name?.toLowerCase().includes(queryLower) ||
+        t.import_payee_name_original?.toLowerCase().includes(queryLower);
       const memoMatch = t.memo?.toLowerCase().includes(queryLower);
       const categoryName = t.category_id ? categoryLookup.get(t.category_id) : null;
       const categoryMatch = categoryName?.toLowerCase().includes(queryLower);
@@ -249,6 +255,7 @@ export async function handleTransactionSearch(
     return {
       date: t.date,
       payee: sanitizeName(t.payee_name),
+      import_payee_name_original: sanitizeOptionalName(t.import_payee_name_original),
       category: categoryName !== undefined ? sanitizeName(categoryName) : null,
       amount: formatCurrency(t.amount),
       amount_raw: t.amount,
@@ -274,7 +281,7 @@ export async function handleTransactionSearch(
   if (validated.category) searchCriteria.push(`category: "${sanitizeName(validated.category)}"`);
   if (validated.min_amount) searchCriteria.push(`min: $${validated.min_amount}`);
   if (validated.max_amount) searchCriteria.push(`max: $${validated.max_amount}`);
-  if (sinceDate) searchCriteria.push(`from: ${sinceDate}`);
+  if (dateFilter.source !== 'default') searchCriteria.push(`from: ${sinceDate}`);
   if (untilDate) searchCriteria.push(`to: ${untilDate}`);
   if (type !== 'all') searchCriteria.push(`type: ${type}`);
 
@@ -283,9 +290,10 @@ export async function handleTransactionSearch(
       search: {
         criteria: searchCriteria.length > 0 ? searchCriteria.join(', ') : 'all transactions',
         date_range: {
-          from: sinceDate ?? 'beginning',
+          from: sinceDate,
           to: untilDate ?? 'now',
         },
+        date_filter: dateFilter,
       },
       summary: {
         total_matches: transactions.length,
@@ -297,6 +305,7 @@ export async function handleTransactionSearch(
       transactions: results.map((r) => ({
         date: r.date,
         payee: r.payee,
+        import_payee_name_original: r.import_payee_name_original,
         category: r.category,
         amount: r.amount,
         memo: r.memo,

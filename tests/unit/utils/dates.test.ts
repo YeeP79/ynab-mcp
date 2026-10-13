@@ -11,6 +11,8 @@ import {
   daysBetween,
   getCurrentMonth,
   getPreviousMonth,
+  resolveSinceDate,
+  ALL_HISTORY_SINCE_DATE,
 } from '../../../src/utils/dates.js';
 
 describe('Date Utilities', () => {
@@ -121,6 +123,38 @@ describe('Date Utilities', () => {
       expect(parseNaturalDate('TODAY')).toBe('2026-01-23');
       expect(parseNaturalDate('This Month')).toBe('2026-01-01');
       expect(parseNaturalDate('PAST 7 DAYS')).toBe('2026-01-16');
+    });
+  });
+
+  describe('resolveSinceDate', () => {
+    it('defaults to 30 days ago and says so when omitted', () => {
+      const resolved = resolveSinceDate(undefined);
+      expect(resolved.since_date).toBe('2025-12-24');
+      expect(resolved.source).toBe('default');
+      expect(resolved.note).toContain('30 days');
+      expect(resolved.input).toBeUndefined();
+    });
+
+    it('maps "all" and "all time" to full history', () => {
+      for (const input of ['all', 'ALL', ' all time ']) {
+        const resolved = resolveSinceDate(input);
+        expect(resolved.since_date).toBe(ALL_HISTORY_SINCE_DATE);
+        expect(resolved.source).toBe('all');
+        expect(resolved.note).toBeUndefined();
+      }
+    });
+
+    it('parses explicit input and keeps the original text', () => {
+      expect(resolveSinceDate('2024-01-01')).toEqual({
+        since_date: '2024-01-01',
+        source: 'input',
+        input: '2024-01-01',
+      });
+      expect(resolveSinceDate('this month').since_date).toBe('2026-01-01');
+    });
+
+    it('rejects unrecognized input instead of defaulting', () => {
+      expect(() => resolveSinceDate('whenever')).toThrow('Unrecognized date format');
     });
   });
 

@@ -165,6 +165,54 @@ export function parseNaturalDate(input: string): string {
   );
 }
 
+/** Lookback applied when a transaction tool is called without a since_date. */
+export const DEFAULT_TRANSACTION_LOOKBACK_DAYS = 30;
+
+/** Earliest date sent for since_date "all"; predates any YNAB budget. */
+export const ALL_HISTORY_SINCE_DATE = '1900-01-01';
+
+export interface ResolvedSinceDate {
+  /** ISO date (YYYY-MM-DD) to send to the YNAB API. */
+  since_date: string;
+  /** Where the date came from: the caller, the default lookback, or "all". */
+  source: 'input' | 'default' | 'all';
+  /** The caller's original input, when one was given. */
+  input?: string;
+  /** Present when the default was applied, so callers know older data exists. */
+  note?: string;
+}
+
+/**
+ * Resolve a transaction tool's since_date into an explicit date.
+ *
+ * The YNAB API never returns full history when since_date is omitted: it
+ * silently applies a server-side window (about 30 days for plain transaction
+ * lists, about one year with a type filter), and the response does not say so.
+ * Always sending an explicit date makes the window predictable and reportable.
+ *
+ * @param input - since_date as given by the caller; "all" (or "all time") means full history
+ * @returns The date to send, plus provenance to report back to the caller
+ */
+export function resolveSinceDate(input?: string): ResolvedSinceDate {
+  if (input === undefined) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    today.setDate(today.getDate() - DEFAULT_TRANSACTION_LOOKBACK_DAYS);
+    return {
+      since_date: formatDate(today),
+      source: 'default',
+      note: `No since_date given; defaulted to the last ${DEFAULT_TRANSACTION_LOOKBACK_DAYS} days. Pass since_date (e.g. "2024-01-01", "past 6 months" or "all") for older transactions.`,
+    };
+  }
+
+  const normalized = input.toLowerCase().trim();
+  if (normalized === 'all' || normalized === 'all time') {
+    return { since_date: ALL_HISTORY_SINCE_DATE, source: 'all', input };
+  }
+
+  return { since_date: parseNaturalDate(input), source: 'input', input };
+}
+
 /**
  * Get a date range object for common periods.
  * Uses LOCAL time (via parseNaturalDate).

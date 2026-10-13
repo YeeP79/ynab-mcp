@@ -8,7 +8,7 @@ import { z } from 'zod';
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { YnabClient } from '../../services/ynab-client.js';
 import { formatCurrency } from '../../utils/milliunits.js';
-import { sanitizeName, sanitizeMemo } from '../../utils/sanitize.js';
+import { sanitizeName, sanitizeMemo, sanitizeOptionalName } from '../../utils/sanitize.js';
 
 // Input schema
 const inputSchema = z.object({
@@ -77,8 +77,8 @@ export async function handleGetTransaction(
         approved: txn.approved,
         flag_color: txn.flag_color,
         import_id: txn.import_id,
-        import_payee_name: sanitizeName(txn.import_payee_name),
-        import_payee_name_original: sanitizeName(txn.import_payee_name_original),
+        import_payee_name: sanitizeOptionalName(txn.import_payee_name),
+        import_payee_name_original: sanitizeOptionalName(txn.import_payee_name_original),
         debt_transaction_type: txn.debt_transaction_type,
         transfer_account_id: txn.transfer_account_id,
         transfer_transaction_id: txn.transfer_transaction_id,

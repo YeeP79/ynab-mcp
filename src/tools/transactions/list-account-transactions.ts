@@ -8,8 +8,8 @@ import { z } from 'zod';
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { YnabClient } from '../../services/ynab-client.js';
 import { formatCurrency, sumMilliunits } from '../../utils/milliunits.js';
-import { parseNaturalDate } from '../../utils/dates.js';
-import { sanitizeName, sanitizeMemo } from '../../utils/sanitize.js';
+import { resolveSinceDate } from '../../utils/dates.js';
+import { sanitizeName, sanitizeMemo, sanitizeOptionalName } from '../../utils/sanitize.js';
 
 // Input schema
 const inputSchema = z.object({
@@ -22,7 +22,7 @@ const inputSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Only return transactions on or after this date. Accepts ISO dates (YYYY-MM-DD) or natural language like "past 30 days", "this month"'
+      'Only return transactions on or after this date. Accepts ISO dates (YYYY-MM-DD), natural language like "past 30 days" or "this month", or "all" for full history. Defaults to the last 30 days when omitted.'
     ),
   limit: z
     .number()
@@ -58,7 +58,7 @@ Requires an account_id. Use ynab_list_accounts first to find the account ID.`,
       since_date: {
         type: 'string',
         description:
-          'Only return transactions on or after this date. Accepts YYYY-MM-DD or natural language like "past 30 days"',
+          'Only return transactions on or after this date. Accepts YYYY-MM-DD, natural language like "past 30 days", or "all" for full history. Defaults to the last 30 days when omitted.',
       },
       limit: {
         type: 'number',
@@ -82,12 +82,12 @@ export async function handleListAccountTransactions(
   const limit = validated.limit ?? 100;
 
   // Parse natural language dates
-  const sinceDate = validated.since_date ? parseNaturalDate(validated.since_date) : undefined;
+  const dateFilter = resolveSinceDate(validated.since_date);
 
   const response = await client.getAccountTransactions(
     budgetId,
     validated.account_id,
-    sinceDate
+    dateFilter.since_date
   );
 
   let transactions = response.data.transactions;
@@ -110,6 +110,7 @@ export async function handleListAccountTransactions(
     amount: formatCurrency(txn.amount),
     memo: sanitizeMemo(txn.memo),
     payee_name: sanitizeName(txn.payee_name),
+    import_payee_name_original: sanitizeOptionalName(txn.import_payee_name_original),
     category_name: sanitizeName(txn.category_name),
     cleared: txn.cleared,
     approved: txn.approved,
@@ -118,6 +119,7 @@ export async function handleListAccountTransactions(
   return JSON.stringify(
     {
       account_id: validated.account_id,
+      date_filter: dateFilter,
       transactions: formattedTransactions,
       summary: {
         count: formattedTransactions.length,

@@ -37,11 +37,14 @@ describe('handleListCategoryTransactions', () => {
     expect(parsed.summary.top_payees).toBeInstanceOf(Array);
     // Kroger appears 3 times, should be top payee
     expect(parsed.summary.top_payees[0].name).toBe('Kroger');
+    // No since_date: an explicit default is sent instead of letting YNAB apply a silent window
     expect(mockClient.getCategoryTransactions).toHaveBeenCalledWith(
       'test-budget-id',
       CATEGORY_ID,
-      undefined
+      expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/)
     );
+    expect(parsed.date_filter.source).toBe('default');
+    expect(parsed.date_filter.note).toContain('30 days');
   });
 
   it('does not mutate the response and applies limit', async () => {

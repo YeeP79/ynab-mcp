@@ -8,8 +8,8 @@ import { z } from 'zod';
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import type { YnabClient } from '../../services/ynab-client.js';
 import { formatCurrency, sumMilliunits } from '../../utils/milliunits.js';
-import { parseNaturalDate } from '../../utils/dates.js';
-import { sanitizeName, sanitizeMemo } from '../../utils/sanitize.js';
+import { resolveSinceDate } from '../../utils/dates.js';
+import { sanitizeName, sanitizeMemo, sanitizeOptionalName } from '../../utils/sanitize.js';
 
 // Input schema
 const inputSchema = z.object({
@@ -22,7 +22,7 @@ const inputSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Only return transactions on or after this date. Accepts ISO dates (YYYY-MM-DD) or natural language like "past 30 days", "this month"'
+      'Only return transactions on or after this date. Accepts ISO dates (YYYY-MM-DD), natural language like "past 30 days" or "this month", or "all" for full history. Defaults to the last 30 days when omitted.'
     ),
   limit: z
     .number()
@@ -59,7 +59,7 @@ Requires a category_id. Use ynab_list_categories first to find the category ID.`
       since_date: {
         type: 'string',
         description:
-          'Only return transactions on or after this date. Accepts YYYY-MM-DD or natural language like "past 30 days"',
+          'Only return transactions on or after this date. Accepts YYYY-MM-DD, natural language like "past 30 days", or "all" for full history. Defaults to the last 30 days when omitted.',
       },
       limit: {
         type: 'integer',
@@ -85,12 +85,12 @@ export async function handleListCategoryTransactions(
   const limit = validated.limit ?? 100;
 
   // Parse natural language dates
-  const sinceDate = validated.since_date ? parseNaturalDate(validated.since_date) : undefined;
+  const dateFilter = resolveSinceDate(validated.since_date);
 
   const response = await client.getCategoryTransactions(
     budgetId,
     validated.category_id,
-    sinceDate
+    dateFilter.since_date
   );
 
   // Sort by date descending and apply limit (avoid mutating response)
@@ -121,6 +121,7 @@ export async function handleListCategoryTransactions(
     amount: formatCurrency(txn.amount),
     memo: sanitizeMemo(txn.memo),
     payee_name: sanitizeName(txn.payee_name),
+    import_payee_name_original: sanitizeOptionalName(txn.import_payee_name_original),
     account_name: sanitizeName(txn.account_name),
     cleared: txn.cleared,
   }));
@@ -128,6 +129,7 @@ export async function handleListCategoryTransactions(
   return JSON.stringify(
     {
       category_id: validated.category_id,
+      date_filter: dateFilter,
       transactions: formattedTransactions,
       summary: {
         count: formattedTransactions.length,
