@@ -241,7 +241,7 @@ These tools provide AI-powered financial insights beyond basic YNAB functionalit
 | `ynab_age_of_money` | Age of money metric with explanation |
 | `ynab_preview_scheduled_transaction` | Preview the budget impact of a scheduled transaction |
 
-### Core YNAB API Tools (40)
+### Core YNAB API Tools (41)
 
 Coverage of the YNAB API endpoints:
 
